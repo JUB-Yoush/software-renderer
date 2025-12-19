@@ -1,4 +1,3 @@
-#include "fmt/base.h"
 #include "jcamera.h"
 #include "jdraw.h"
 #include "jgraphics.h"
@@ -29,7 +28,7 @@ int main(void) {
   i8 render_mode = 0;
 
   Matrix4x4 projectionMatrix = MakeProjectionMatrix(
-      FOV, SCREEN_WIDTH, SCREEN_HEIGHT, NEAR_PLANE, FAR_PLANE);
+      FOV, SCREEN_HEIGHT, SCREEN_WIDTH, NEAR_PLANE, FAR_PLANE);
 
   while (!WindowShouldClose()) {
 

@@ -8,7 +8,6 @@
 using namespace std;
 
 struct Triangle {
-  // 3vert.     3uvs       3norm.
   i32 points[9];
 
   // Overload the subscript operator

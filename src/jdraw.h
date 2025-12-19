@@ -1,4 +1,5 @@
 #pragma once
+#include "consts.h"
 #include "jgraphics.h"
 #include "jlib.h"
 #include "jmath.h"
@@ -33,7 +34,7 @@ void JDrawLine(Vec2 a, Vec2 b, Color color) {
 bool IsBackFace(Vec3 v1, Vec3 v2, Vec3 v3) {
   Vec3 edge1 = v2 - v1;
   Vec3 edge2 = v3 - v1;
-  Vec3 cross = V3CrossProduct(edge1, edge2);
+  Vec3 cross = cross(edge1, edge2);
   Vec3 cross_norm = V3Normalize(cross);
   Vec3 to_camera = V3Normalize(v1);
 
