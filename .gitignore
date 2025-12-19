@@ -1,0 +1,15 @@
+.idea/
+.vscode/
+.vs/
+cmake-build-debug/
+bin/
+build/
+out/
+CMakeSettings.json
+cmake_install.cmake
+CMakeCache.txt
+CPackConfig.cmake
+_deps/
+raygui/
+.cache/
+CMakeFiles/
