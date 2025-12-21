@@ -10,7 +10,7 @@
 struct Matrix4x4 {
   f32 mat[4][4];
 
-  Matrix4x4() : mat{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}} {};
+  Matrix4x4() : mat{{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}} {};
 
   Matrix4x4(const f32 val[4][4]) {
     for (int i = 0; i < 4; i++) {
@@ -96,7 +96,7 @@ Matrix4x4 Mat4Mul(Matrix4x4 a, Matrix4x4 b) {
 }
 
 Matrix4x4 MakeTranslationMatrix(f32 x, f32 y, f32 z) {
-  f32 values[4][4] = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {x, y, z, 1}};
+  f32 values[4][4] = {{1, 0, 0, x}, {0, 1, 0, y}, {0, 0, 1, z}, {0, 0, 0, 1}};
   return Matrix4x4(values);
 }
 
@@ -149,4 +149,20 @@ Matrix4x4 MakeProjectionMatrix(f32 fov, i32 screenHeight, i32 screenWidth,
                       {0, 0, -far / (far - near), -1},
                       {0, 0, -far * near / (far - near), 0}};
   return Matrix4x4(values);
+}
+
+Vec3 BarycentricWeights(Vec2 a, Vec2 b, Vec2 c, Vec2 p) {
+  // get vectors between verts, as well as vec to point
+  Vec2 ac = c - a;
+  Vec2 ab = b - a;
+  Vec2 ap = p - a;
+  Vec2 pc = c - p;
+  Vec2 pb = b - p;
+
+  f32 area = (ac.x * ab.y - ac.y * ab.x);
+
+  f32 alpha = (pc.x * pb.y - pc.y * pb.x) / area;
+  f32 beta = (ac.x * ap.y - ac.y * ap.x) / area;
+  f32 gamma = 1.0 - alpha - beta;
+  return {alpha, beta, gamma};
 }

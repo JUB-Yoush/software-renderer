@@ -12,6 +12,10 @@ using namespace std;
 struct Vec2 {
   f32 x;
   f32 y;
+
+  Vec2 operator+(const Vec2 &v2) { return Vec2{x + v2.x, y + v2.y}; }
+  Vec2 operator-(const Vec2 &v2) { return Vec2{x - v2.x, y - v2.y}; }
+  Vec2 operator*(const Vec2 &v2) { return Vec2{x * v2.x, y * v2.y}; }
 };
 
 struct Vec3 {
@@ -43,6 +47,8 @@ struct Vec3 {
         x * v2.y - y * v2.x,
     };
   }
+
+  Vec3 floor_xy() { return {floor(x), floor(y), z}; }
 
   f32 dot(Vec3 v2) { return x * v2.x + y * v2.y + z * v2.z; }
 };

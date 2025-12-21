@@ -4,6 +4,7 @@
 #include "jinput.h"
 #include "jmath.h"
 #include "raylib.h"
+#include "zubffer.h"
 #include <iostream>
 
 // #define SCREEN_WIDTH (800)
@@ -20,11 +21,12 @@ int main(void) {
   //     works
 
   JCamera camera = MakeCamera({0, 0, -3}, {0, 0, -1});
+  ZBuffer zbuffer;
   Vec3 translation = {0, 0, 0};
   Vec3 rotation = {0, 0, 0};
   f32 scale = 1.0;
-  i8 render_modes_count = 2;
-  i8 render_mode = 0;
+  i8 render_modes_count = 3;
+  i8 render_mode = render_modes_count - 2;
 
   Matrix4x4 projectionMatrix = MakeProjectionMatrix(
       FOV, SCREEN_HEIGHT, SCREEN_WIDTH, NEAR_PLANE, FAR_PLANE);
@@ -54,7 +56,9 @@ int main(void) {
     ApplyTransformations(mesh.transformed_vertices, mesh.vertices, view_matrix);
 
     BeginDrawing();
-      ClearBackground(BLACK);
+    ClearBackground(BLACK);
+
+    ClearZBuffer(zbuffer);
 
     switch (render_mode) {
     case 0:
@@ -67,8 +71,12 @@ int main(void) {
                     GREEN, true);
       DrawText("mode 2", 0, 0, 20, WHITE);
       break;
+    case 2:
+      DrawUnlit(mesh.transformed_vertices, mesh.triangles, projectionMatrix,
+                WHITE, zbuffer);
+      DrawText("mode 3", 0, 0, 20, WHITE);
+      break;
     }
-
 
     EndDrawing();
   }

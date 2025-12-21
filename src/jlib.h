@@ -29,4 +29,8 @@ template <typename F> privDefer<F> defer_func(F f) { return privDefer<F>(f); }
 #define DEFER_2(x, y) DEFER_1(x, y)
 #define DEFER_3(x) DEFER_2(x, __COUNTER__)
 #define defer(code) auto DEFER_3(_defer_) = defer_func([&]() { code; })
+
+// template <typename T> int length_of(T x[]) { return sizeof(x) / sizeof(x[0]);
+// }
+
 } // namespace stdj

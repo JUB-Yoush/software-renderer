@@ -3,9 +3,14 @@
 #include "jgraphics.h"
 #include "jlib.h"
 #include "jmath.h"
+#include "jvectors.h"
 #include "raylib.h"
+#include "sort.h"
+#include "zubffer.h"
 #include <cmath>
 #include <cstdio>
+
+#include "fmt/xchar.h"
 using namespace std;
 
 void ApplyTransformations(vector<Vec3> &transformed, vector<Vec3> original,
@@ -91,8 +96,108 @@ void DrawWireFrame(vector<Vec3> &vertices, vector<Triangle> &triangles,
     JDrawLine(Vec2{p1.x, p1.y}, Vec2{p2.x, p2.y}, color);
     JDrawLine(Vec2{p2.x, p2.y}, Vec2{p3.x, p3.y}, color);
     JDrawLine(Vec2{p3.x, p3.y}, Vec2{p1.x, p1.y}, color);
-    // DrawLine(p1.x, p1.y, p2.x, p2.y, color);
-    // DrawLine(p2.x, p2.y, p3.x, p3.y, color);
-    // DrawLine(p3.x, p3.y, p1.x, p1.y, color);
+  }
+}
+
+bool IsPointOutsideViewport(i32 x, i32 y) {
+  return x < 0 || x >= SCREEN_WIDTH || y < 0 || y >= SCREEN_HEIGHT;
+}
+
+void JDrawPixel(f32 x, f32 y, Vec3 p1, Vec3 p2, Vec3 p3, Color color,
+                ZBuffer zbuffer) {
+  i32 ix = i32(x);
+  i32 iy = i32(y);
+  if (IsPointOutsideViewport(ix, iy)) {
+    return;
+  }
+
+  Vec2 p = {x, y};
+  Vec3 weights =
+      BarycentricWeights({p1.x, p1.y}, {p2.x, p2.y}, {p3.x, p3.y}, p);
+  f32 alpha = weights.x;
+  f32 beta = weights.y;
+  f32 gamma = weights.z;
+
+  f32 denom = alpha * p1.z + beta * p2.z + gamma * p3.z;
+  f32 depth = 1.0 / denom;
+
+  i32 zindex = SCREEN_WIDTH * iy + ix;
+
+  if (depth < zbuffer.buff[zindex]) {
+    DrawPixel(ix, iy, color);
+    zbuffer.buff[zindex] = depth;
+  }
+}
+
+void DrawFilledTriangle(Vec3 &p1, Vec3 &p2, Vec3 &p3, Color color,
+                        ZBuffer zbuffer) {
+  // simple FTFB rasterizer
+  SortPoints(p1, p2, p3);
+
+  p1.floor_xy();
+  p2.floor_xy();
+  p3.floor_xy();
+
+  // dont split if triangle is already flat bottom or flat top
+  if (p2.y != p1.y) {
+    f32 inv_slope1 = (p2.x - p1.x) / (p2.y - p1.y);
+    f32 inv_slope2 = (p3.x - p1.x) / (p3.y - p1.y);
+
+    for (i32 y = p1.y; y <= p2.y; y++) {
+
+      f32 x_start = p1.x + (y - p1.y) * inv_slope1;
+      f32 x_end = p1.x + (y - p1.y) * inv_slope2;
+
+      if (x_start > x_end) {
+        swap(x_start, x_end);
+      }
+
+      for (i32 x = x_start; x <= x_end; x += 1) {
+        JDrawPixel(x, y, p1, p2, p3, color, zbuffer);
+      }
+    }
+  }
+  fmt::print("out of first loop");
+
+  if (p3.y != p1.y) {
+    f32 inv_slope1 = (p3.x - p2.x) / (p3.y - p2.y);
+    f32 inv_slope2 = (p3.x - p1.x) / (p3.y - p1.y);
+
+    for (i32 y = p2.y; y <= p3.y; y++) {
+
+      f32 x_start = p2.x + (y - p2.y) * inv_slope1;
+      f32 x_end = p1.x + (y - p1.y) * inv_slope2;
+
+      if (x_start > x_end) {
+        swap(x_start, x_end);
+      }
+
+      for (i32 x = x_start; x <= x_end; x += 1) {
+        JDrawPixel(x, y, p1, p2, p3, color, zbuffer);
+      }
+    }
+  }
+  i32 foo = 3;
+}
+
+void DrawUnlit(vector<Vec3> vertices, vector<Triangle> triangles,
+               Matrix4x4 proj_mat, Color color, ZBuffer zbuffer) {
+  for (Triangle &tri : triangles) {
+    Vec3 v1 = vertices[tri[0]];
+    Vec3 v2 = vertices[tri[1]];
+    Vec3 v3 = vertices[tri[2]];
+
+    if (IsBackFace(v1, v2, v3)) {
+      continue;
+    }
+
+    Vec3 p1 = ProjectToScreen(proj_mat, v1);
+    Vec3 p2 = ProjectToScreen(proj_mat, v2);
+    Vec3 p3 = ProjectToScreen(proj_mat, v3);
+
+    if (IsFaceOutsideFrustrum(p1, p2, p3)) {
+      continue;
+    }
+    DrawFilledTriangle(p1, p2, p3, color, zbuffer);
   }
 }
