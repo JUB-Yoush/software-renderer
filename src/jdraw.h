@@ -38,7 +38,7 @@ bool IsBackFace(Vec3 v1, Vec3 v2, Vec3 v3) {
   Vec3 cross_norm = cross.normalized();
   Vec3 to_camera = v1.normalized();
 
-  return cross_norm.dot(to_camera);
+  return cross_norm.dot(to_camera) >= 0;
 }
 
 bool IsFaceOutsideFrustrum(Vec3 p1, Vec3 p2, Vec3 p3) {
@@ -51,7 +51,7 @@ bool IsFaceOutsideFrustrum(Vec3 p1, Vec3 p2, Vec3 p3) {
   f32 min_y = min(p1.y, min(p2.y, p3.y));
   f32 max_y = max(p1.y, max(p2.y, p3.y));
 
-  if (max_x < 0 || min_x > SCREEN_WIDTH || max_y < 0 || min_y > SCREEN_WIDTH) {
+  if (max_x < 0 || min_x > SCREEN_WIDTH || max_y < 0 || min_y > SCREEN_HEIGHT) {
     return true;
   }
   return false;
