@@ -141,7 +141,7 @@ Matrix4x4 MakeViewMatrix(Vec3 eye, Vec3 target) {
 
 Matrix4x4 MakeProjectionMatrix(f32 fov, i32 screenHeight, i32 screenWidth,
                                f32 near, f32 far) {
-  f32 f = 1.0 / std::tan(fov * 0.5 * DEG_TO_RAD);
+  f32 f = 1.0 / tan(fov * 0.5 * DEG_TO_RAD);
   f32 aspect = f32(screenWidth) / f32(screenHeight);
 
   f32 values[4][4] = {{f / aspect, 0, 0, 0},

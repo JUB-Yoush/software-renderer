@@ -18,7 +18,6 @@ int main(void) {
   // Texture2D texture =
   //     LoadTexture(ASSETS_PATH "test.png"); // Check README.md for how this
   //     works
-  JMesh mesh = MakeCube();
 
   JCamera camera = MakeCamera({0, 0, -3}, {0, 0, -1});
   Vec3 translation = {0, 0, 0};
@@ -51,9 +50,11 @@ int main(void) {
 
     view_matrix = Mat4Mul(view_matrix, model_matrix);
 
+    JMesh mesh = MakeCube();
     ApplyTransformations(mesh.transformed_vertices, mesh.vertices, view_matrix);
 
     BeginDrawing();
+      ClearBackground(BLACK);
 
     switch (render_mode) {
     case 0:
@@ -68,7 +69,6 @@ int main(void) {
       break;
     }
 
-    ClearBackground(BLACK);
 
     EndDrawing();
   }

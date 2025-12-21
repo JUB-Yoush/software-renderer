@@ -39,13 +39,13 @@ struct JMesh {
 JMesh MakeCube() {
 
   vector<Vec3> transformed_verticies;
-  transformed_verticies.reserve(8);
+  transformed_verticies.resize(8);
 
   vector<Vec3> transformed_normals;
-  transformed_normals.reserve(6);
+  transformed_normals.resize(6);
 
   vector<Vec3> vertices;
-  vertices.reserve(8);
+  vertices.resize(8);
   vertices[0] = Vec3{-1.0, -1.0, -1.0};
   vertices[1] = Vec3{-1.0, 1.0, -1.0};
   vertices[2] = Vec3{1.0, 1.0, -1.0};
@@ -56,7 +56,7 @@ JMesh MakeCube() {
   vertices[7] = Vec3{-1.0, -1.0, 1.0};
 
   vector<Vec3> normals;
-  normals.reserve(6);
+  normals.resize(6);
   normals[0] = {0.0, 0.0, -1.0};
   normals[1] = {1.0, 0.0, 0.0};
   normals[2] = {0.0, 0.0, 1.0};
@@ -65,14 +65,14 @@ JMesh MakeCube() {
   normals[5] = {0.0, -1.0, 0.0};
 
   vector<Vec2> uvs;
-  uvs.reserve(4);
+  uvs.resize(4);
   uvs[0] = Vec2{1.0, 1.0};
   uvs[1] = Vec2{1.0, 0.0};
   uvs[2] = Vec2{0.0, 0.0};
   uvs[3] = Vec2{0.0, 1.0};
 
   vector<Triangle> triangles;
-  triangles.reserve(12);
+  triangles.resize(12);
 
   // Front                 vert.     uvs       norm.
   triangles[0] = Triangle{0, 1, 2, 0, 1, 2, 0, 0, 0};

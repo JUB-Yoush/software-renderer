@@ -34,16 +34,16 @@ void JDrawLine(Vec2 a, Vec2 b, Color color) {
 bool IsBackFace(Vec3 v1, Vec3 v2, Vec3 v3) {
   Vec3 edge1 = v2 - v1;
   Vec3 edge2 = v3 - v1;
-  Vec3 cross = cross(edge1, edge2);
-  Vec3 cross_norm = V3Normalize(cross);
-  Vec3 to_camera = V3Normalize(v1);
+  Vec3 cross = edge1.cross(edge2);
+  Vec3 cross_norm = cross.normalized();
+  Vec3 to_camera = v1.normalized();
 
-  return V3DotProduct(cross_norm, to_camera);
+  return cross_norm.dot(to_camera);
 }
 
 bool IsFaceOutsideFrustrum(Vec3 p1, Vec3 p2, Vec3 p3) {
   if ((p1.z > 1.0 || p2.z > 1.0 || p3.z > 1.0) ||
-      (p1.z < -1.0 || p1.z < -1.0 || p1.z < -1.0)) {
+      (p1.z < -1.0 || p2.z < -1.0 || p3.z < -1.0)) {
     return true;
   }
   f32 min_x = min(p1.x, min(p2.x, p3.x));
@@ -68,8 +68,8 @@ Vec3 ProjectToScreen(Matrix4x4 mat, Vec3 p) {
   return Vec3{screen_x, screen_y, inv_w};
 }
 
-void DrawWireFrame(vector<Vec3> vertices, vector<Triangle> triangles,
-                   Matrix4x4 proj_mat, Color color, bool cull_back_face
+void DrawWireFrame(vector<Vec3> &vertices, vector<Triangle> &triangles,
+                   Matrix4x4 &proj_mat, Color color, bool cull_back_face
 
 ) {
   for (Triangle &tri : triangles) {
@@ -86,15 +86,13 @@ void DrawWireFrame(vector<Vec3> vertices, vector<Triangle> triangles,
     Vec3 p3 = ProjectToScreen(proj_mat, v3);
 
     if (IsFaceOutsideFrustrum(p1, p2, p3)) {
-
       continue;
     }
-    printf("outside");
-    // JDrawLine(Vec2{p1.x, p1.y}, Vec2{p2.x, p2.y}, color);
-    // JDrawLine(Vec2{p2.x, p2.y}, Vec2{p3.x, p3.y}, color);
-    // JDrawLine(Vec2{p3.x, p3.y}, Vec2{p1.x, p1.y}, color);
-    DrawLine(p1.x, p1.y, p2.x, p2.y, color);
-    DrawLine(p2.x, p2.y, p3.x, p3.y, color);
-    DrawLine(p3.x, p3.y, p1.x, p1.y, color);
+    JDrawLine(Vec2{p1.x, p1.y}, Vec2{p2.x, p2.y}, color);
+    JDrawLine(Vec2{p2.x, p2.y}, Vec2{p3.x, p3.y}, color);
+    JDrawLine(Vec2{p3.x, p3.y}, Vec2{p1.x, p1.y}, color);
+    // DrawLine(p1.x, p1.y, p2.x, p2.y, color);
+    // DrawLine(p2.x, p2.y, p3.x, p3.y, color);
+    // DrawLine(p3.x, p3.y, p1.x, p1.y, color);
   }
 }
