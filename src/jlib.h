@@ -32,5 +32,13 @@ template <typename F> privDefer<F> defer_func(F f) { return privDefer<F>(f); }
 
 // template <typename T> int length_of(T x[]) { return sizeof(x) / sizeof(x[0]);
 // }
+f64 clamp(f64 d, f64 min, f64 max) {
+  const f64 t = d < min ? min : d;
+  return t > max ? max : t;
+}
 
+// f32 clamp(f32 d, f32 min, f32 max) {
+//   const f32 t = d < min ? min : d;
+//   return t > max ? max : t;
+// }
 } // namespace stdj

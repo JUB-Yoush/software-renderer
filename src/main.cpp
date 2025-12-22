@@ -14,18 +14,19 @@
 
 int main(void) {
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE);
-  SetTargetFPS(60);
+  SetTargetFPS(30);
 
   // Texture2D texture =
   //     LoadTexture(ASSETS_PATH "test.png"); // Check README.md for how this
   //     works
 
   JCamera camera = MakeCamera({0, 0, -3}, {0, 0, -1});
+  Light light = MakeLight({0, 1, 0}, 1);
   ZBuffer zbuffer;
   Vec3 translation = {0, 0, 0};
   Vec3 rotation = {0, 0, 0};
   f32 scale = 1.0;
-  i8 render_modes_count = 3;
+  i8 render_modes_count = 4;
   i8 render_mode = render_modes_count - 1;
 
   Matrix4x4 projectionMatrix = MakeProjectionMatrix(
@@ -64,17 +65,23 @@ int main(void) {
     case 0:
       DrawWireFrame(mesh.transformed_vertices, mesh.triangles, projectionMatrix,
                     GREEN, false);
-      DrawText("mode 1", 0, 0, 20, WHITE);
+      DrawText("wire + backface", 0, 0, 20, WHITE);
       break;
     case 1:
       DrawWireFrame(mesh.transformed_vertices, mesh.triangles, projectionMatrix,
                     GREEN, true);
-      DrawText("mode 2", 0, 0, 20, WHITE);
+      DrawText("wire", 0, 0, 20, WHITE);
       break;
     case 2:
       DrawUnlit(mesh.transformed_vertices, mesh.triangles, projectionMatrix,
                 WHITE, zbuffer);
-      DrawText("mode 3", 0, 0, 20, WHITE);
+      DrawText("mesh, unlit", 0, 0, 20, WHITE);
+      break;
+
+    case 3:
+      DrawFlatShaded(mesh.transformed_vertices, mesh.triangles,
+                     projectionMatrix, light, WHITE, zbuffer);
+      DrawText("mesh, lit", 0, 0, 20, WHITE);
       break;
     }
 

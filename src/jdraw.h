@@ -4,9 +4,11 @@
 #include "jlib.h"
 #include "jmath.h"
 #include "jvectors.h"
+#include "light.h"
 #include "raylib.h"
 #include "sort.h"
 #include "zbuffer.h"
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 
@@ -44,6 +46,16 @@ bool IsBackFace(Vec3 v1, Vec3 v2, Vec3 v3) {
   Vec3 to_camera = v1.normalized();
 
   return cross_norm.dot(to_camera) >= 0;
+}
+
+f32 GetBackFaceValue(Vec3 v1, Vec3 v2, Vec3 v3) {
+  Vec3 edge1 = v2 - v1;
+  Vec3 edge2 = v3 - v1;
+  Vec3 cross = edge1.cross(edge2);
+  Vec3 cross_norm = cross.normalized();
+  Vec3 to_camera = v1.normalized();
+
+  return cross_norm.dot(to_camera);
 }
 
 bool IsFaceOutsideFrustrum(Vec3 p1, Vec3 p2, Vec3 p3) {
@@ -125,7 +137,7 @@ void JDrawPixel(f32 x, f32 y, Vec3 p1, Vec3 p2, Vec3 p3, Color color,
   i32 zindex = SCREEN_WIDTH * iy + ix;
   f32 buffer_value = zbuffer.buff[zindex];
 
-if (depth < buffer_value) {
+  if (depth < buffer_value) {
     DrawPixel(ix, iy, color);
     zbuffer.buff[zindex] = depth;
   }
@@ -165,7 +177,8 @@ void DrawFilledTriangle(Vec3 &p1, Vec3 &p2, Vec3 &p3, Color color,
   }
 
   // flat top
-  if (p3.y != p1.y && p3.y != p2.y) {
+  if (p3.y != p1.y &&
+      p3.y != p2.y) { // odin impl only checks p3.y != p1.y, no idea why
     f32 inv_slope1 = (p3.x - p2.x) / (p3.y - p2.y);
     f32 inv_slope2 = (p3.x - p1.x) / (p3.y - p1.y);
 
@@ -210,5 +223,39 @@ void DrawUnlit(vector<Vec3> &vertices, vector<Triangle> &triangles,
       continue;
     }
     DrawFilledTriangle(p1, p2, p3, color, zbuffer);
+  }
+}
+
+void DrawFlatShaded(vector<Vec3> &vertices, vector<Triangle> &triangles,
+                    Matrix4x4 proj_mat, Light light, Color color,
+                    ZBuffer &zbuffer, f32 ambient = 0.2) {
+
+  for (Triangle &tri : triangles) {
+
+    Vec3 v1 = vertices[tri[0]];
+    Vec3 v2 = vertices[tri[1]];
+    Vec3 v3 = vertices[tri[2]];
+
+    Vec3 cross = (v2 - v1).cross(v3 - v1);
+    Vec3 cross_norm = cross.normalized();
+    Vec3 to_cam = v1.normalized();
+
+    if (cross_norm.dot(to_cam) >= 0.0) {
+      continue;
+    }
+
+    Vec3 p1 = ProjectToScreen(proj_mat, v1);
+    Vec3 p2 = ProjectToScreen(proj_mat, v2);
+    Vec3 p3 = ProjectToScreen(proj_mat, v3);
+
+    if (IsFaceOutsideFrustrum(p1, p2, p3)) {
+      continue;
+    }
+
+    f32 intesnity = stdj::clamp(cross_norm.dot(light.direction), ambient, 1.0);
+    auto shadedColor = Color{static_cast<u8>(color.r * intesnity),
+                             static_cast<u8>(color.g * intesnity),
+                             static_cast<u8>(color.b * intesnity), color.a};
+    DrawFilledTriangle(p1, p2, p3, shadedColor, zbuffer);
   }
 }
