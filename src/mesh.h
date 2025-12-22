@@ -124,6 +124,8 @@ JMesh load_mesh_from_file(const char *filename) {
   normals: vec of Vector3 (vn)
   triangles: vec of Triangle (f)
   uvs: vec of Vector2 (vt)
+  Thanks Ramy for the inspiration
+  https://github.com/ramyzhang/ubi-next-2024-2025/blob/main/RuanGame/source/engine/graphics/Primitives.cpp#L135
   */
   vector<Vec3> vertices;
   vector<Vec3> normals;
