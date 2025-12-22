@@ -4,6 +4,7 @@
 #include "jinput.h"
 #include "jmath.h"
 #include "raylib.h"
+#include "texture.h"
 #include "zbuffer.h"
 #include <iostream>
 
@@ -26,8 +27,10 @@ int main(void) {
   Vec3 translation = {0, 0, 0};
   Vec3 rotation = {0, 0, 0};
   f32 scale = 1.0;
-  i8 render_modes_count = 4;
+  i8 render_modes_count = 5;
   i8 render_mode = render_modes_count - 1;
+
+  JTexture texture = JLoadImageFromFile(ASSETS_PATH "uv_checker_512.png");
 
   Matrix4x4 projectionMatrix = MakeProjectionMatrix(
       FOV, SCREEN_HEIGHT, SCREEN_WIDTH, NEAR_PLANE, FAR_PLANE);
@@ -82,6 +85,12 @@ int main(void) {
       DrawFlatShaded(mesh.transformed_vertices, mesh.triangles,
                      projectionMatrix, light, WHITE, zbuffer);
       DrawText("mesh, lit", 0, 0, 20, WHITE);
+      break;
+
+    case 4:
+      DrawTextureFlatShaded(mesh.transformed_vertices, mesh.triangles, mesh.uvs,
+                            projectionMatrix, light, texture, zbuffer);
+      DrawText("textured + lit", 0, 0, 20, WHITE);
       break;
     }
 

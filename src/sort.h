@@ -17,3 +17,22 @@ void SortPoints(Vec3 &p1, Vec3 &p2, Vec3 &p3) {
     swap(p1, p2);
   }
 }
+
+void SortPointsAndUVs(Vec3 &p1, Vec3 &p2, Vec3 &p3, Vec2 &uv1, Vec2 &uv2,
+                      Vec2 &uv3) {
+
+  if (p1.y > p2.y) {
+    swap(p1, p2);
+    swap(uv1, uv2);
+  }
+
+  if (p2.y > p3.y) {
+    swap(p2, p3);
+    swap(uv2, uv3);
+  }
+
+  if (p1.y > p2.y) {
+    swap(p1, p2);
+    swap(uv1, uv2);
+  }
+}
