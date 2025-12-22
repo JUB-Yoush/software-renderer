@@ -21,7 +21,7 @@ int main(void) {
   //     works
 
   JCamera camera = MakeCamera({0, 0, -3}, {0, 0, -1});
-  Light light = MakeLight({0, 1, 0}, 1);
+  Light light = MakeLight({0, -1, 0}, 1);
   ZBuffer zbuffer;
   Vec3 translation = {0, 0, 0};
   Vec3 rotation = {0, 0, 0};
