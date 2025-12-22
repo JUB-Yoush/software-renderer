@@ -1,6 +1,6 @@
 #include "jcamera.h"
 #include "jdraw.h"
-#include "jgraphics.h"
+#include "mesh.h"
 #include "jinput.h"
 #include "jmath.h"
 #include "raylib.h"
@@ -35,6 +35,10 @@ int main(void) {
   Matrix4x4 projectionMatrix = MakeProjectionMatrix(
       FOV, SCREEN_HEIGHT, SCREEN_WIDTH, NEAR_PLANE, FAR_PLANE);
 
+  JMesh mesh = LoadMeshFromFile(ASSETS_PATH "monkey.obj");
+  JMesh cube = MakeCube();
+  //mesh.triangles = cube.triangles;
+
   while (!WindowShouldClose()) {
 
     f32 delta = GetFrameTime();
@@ -56,7 +60,6 @@ int main(void) {
 
     view_matrix = Mat4Mul(view_matrix, model_matrix);
 
-    JMesh mesh = MakeCube();
     ApplyTransformations(mesh.transformed_vertices, mesh.vertices, view_matrix);
 
     BeginDrawing();

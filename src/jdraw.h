@@ -1,6 +1,6 @@
 #pragma once
 #include "consts.h"
-#include "jgraphics.h"
+#include "mesh.h"
 #include "jlib.h"
 #include "jmath.h"
 #include "jvectors.h"
