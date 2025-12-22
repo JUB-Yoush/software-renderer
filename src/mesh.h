@@ -109,14 +109,14 @@ JMesh MakeCube() {
 
 Triangle make_triangle_from_obj_points(f32 points[10]) {
   Triangle tri;
-  // obj files are 1 indexed
   for (int i = 1; i <= 10; ++i) {
+  // obj files are 1 indexed
     tri.points[i-1] = points[i] - 1;
   }
   return tri;
 }
 
-JMesh LoadMeshFromFile(const char *filename) {
+JMesh load_mesh_from_file(const char *filename) {
   /*
   parses out into
 

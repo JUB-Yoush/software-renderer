@@ -16,14 +16,14 @@
 #include "fmt/xchar.h"
 using namespace std;
 
-void ApplyTransformations(vector<Vec3> &transformed, vector<Vec3> original,
+void apply_transformations(vector<Vec3> &transformed, vector<Vec3> original,
                           Matrix4x4 mat) {
   for (i32 i = 0; i < original.size(); i++) {
-    transformed[i] = Mat4MulVec3(mat, original[i]);
+    transformed[i] = mat * original[i];
   }
 }
 
-void JDrawLine(Vec2 a, Vec2 b, Color color) {
+void j_draw_line(Vec2 a, Vec2 b, Color color) {
   f32 dx = b.x - a.x;
   f32 dy = b.y - a.y;
   f32 longer_delta = abs(dx) >= abs(dy) ? abs(dx) : abs(dy);
@@ -39,7 +39,7 @@ void JDrawLine(Vec2 a, Vec2 b, Color color) {
   }
 }
 
-bool IsBackFace(Vec3 v1, Vec3 v2, Vec3 v3) {
+bool is_back_face(Vec3 v1, Vec3 v2, Vec3 v3) {
   Vec3 edge1 = v2 - v1;
   Vec3 edge2 = v3 - v1;
   Vec3 cross = edge1.cross(edge2);
@@ -49,7 +49,7 @@ bool IsBackFace(Vec3 v1, Vec3 v2, Vec3 v3) {
   return cross_norm.dot(to_camera) >= 0;
 }
 
-f32 GetBackFaceValue(Vec3 v1, Vec3 v2, Vec3 v3) {
+f32 get_back_face_value(Vec3 v1, Vec3 v2, Vec3 v3) {
   Vec3 edge1 = v2 - v1;
   Vec3 edge2 = v3 - v1;
   Vec3 cross = edge1.cross(edge2);
@@ -59,7 +59,7 @@ f32 GetBackFaceValue(Vec3 v1, Vec3 v2, Vec3 v3) {
   return cross_norm.dot(to_camera);
 }
 
-bool IsFaceOutsideFrustrum(Vec3 p1, Vec3 p2, Vec3 p3) {
+bool is_face_outside_frustrum(Vec3 p1, Vec3 p2, Vec3 p3) {
   if ((p1.z > 1.0 || p2.z > 1.0 || p3.z > 1.0) ||
       (p1.z < -1.0 || p2.z < -1.0 || p3.z < -1.0)) {
     return true;
@@ -75,8 +75,9 @@ bool IsFaceOutsideFrustrum(Vec3 p1, Vec3 p2, Vec3 p3) {
   return false;
 }
 
-Vec3 ProjectToScreen(Matrix4x4 mat, Vec3 p) {
-  Vec4 clip = Mat4MulVec4(mat, Vec4{p.x, p.y, p.z, 1});
+Vec3 project_to_screen(Matrix4x4 mat, Vec3 p) {
+  Vec4 clip = Vec4{p.x, p.y, p.z, 1};
+  clip = (mat * clip );
   f32 inv_w = 1.0 / clip.w;
   f32 ndc_x = clip.x * inv_w;
   f32 ndc_y = clip.y * inv_w;
@@ -86,7 +87,7 @@ Vec3 ProjectToScreen(Matrix4x4 mat, Vec3 p) {
   return Vec3{screen_x, screen_y, inv_w};
 }
 
-void DrawWireFrame(vector<Vec3> &vertices, vector<Triangle> &triangles,
+void draw_wire_frame(vector<Vec3> &vertices, vector<Triangle> &triangles,
                    Matrix4x4 &proj_mat, Color color, bool cull_back_face
 
 ) {
@@ -95,39 +96,39 @@ void DrawWireFrame(vector<Vec3> &vertices, vector<Triangle> &triangles,
     Vec3 v2 = vertices[tri[1]];
     Vec3 v3 = vertices[tri[2]];
 
-    if (cull_back_face && IsBackFace(v1, v2, v3)) {
+    if (cull_back_face && is_back_face(v1, v2, v3)) {
       continue;
     }
 
-    Vec3 p1 = ProjectToScreen(proj_mat, v1);
-    Vec3 p2 = ProjectToScreen(proj_mat, v2);
-    Vec3 p3 = ProjectToScreen(proj_mat, v3);
+    Vec3 p1 = project_to_screen(proj_mat, v1);
+    Vec3 p2 = project_to_screen(proj_mat, v2);
+    Vec3 p3 = project_to_screen(proj_mat, v3);
 
-    if (IsFaceOutsideFrustrum(p1, p2, p3)) {
+    if (is_face_outside_frustrum(p1, p2, p3)) {
       continue;
     }
-    JDrawLine(Vec2{p1.x, p1.y}, Vec2{p2.x, p2.y}, color);
-    JDrawLine(Vec2{p2.x, p2.y}, Vec2{p3.x, p3.y}, color);
-    JDrawLine(Vec2{p3.x, p3.y}, Vec2{p1.x, p1.y}, color);
+    j_draw_line(Vec2{p1.x, p1.y}, Vec2{p2.x, p2.y}, color);
+    j_draw_line(Vec2{p2.x, p2.y}, Vec2{p3.x, p3.y}, color);
+    j_draw_line(Vec2{p3.x, p3.y}, Vec2{p1.x, p1.y}, color);
   }
 }
 
-bool IsPointOutsideViewport(i32 x, i32 y) {
+bool is_point_outside_viewport(i32 x, i32 y) {
   return x < 0 || x >= SCREEN_WIDTH || y < 0 || y >= SCREEN_HEIGHT;
 }
 
-void JDrawPixel(f32 x, f32 y, Vec3 p1, Vec3 p2, Vec3 p3, Color color,
+void j_draw_pixel(f32 x, f32 y, Vec3 p1, Vec3 p2, Vec3 p3, Color color,
                 ZBuffer &zbuffer) {
   i32 ix = static_cast<i32>(x);
   i32 iy = static_cast<i32>(y);
 
-  if (IsPointOutsideViewport(ix, iy)) {
+  if (is_point_outside_viewport(ix, iy)) {
     return;
   }
 
   Vec2 p = {x, y};
   Vec3 weights =
-      BarycentricWeights({p1.x, p1.y}, {p2.x, p2.y}, {p3.x, p3.y}, p);
+      barycentric_weights({p1.x, p1.y}, {p2.x, p2.y}, {p3.x, p3.y}, p);
   f32 alpha = weights.x;
   f32 beta = weights.y;
   f32 gamma = weights.z;
@@ -144,7 +145,7 @@ void JDrawPixel(f32 x, f32 y, Vec3 p1, Vec3 p2, Vec3 p3, Color color,
   }
 }
 
-void DrawFilledTriangle(Vec3 &p1, Vec3 &p2, Vec3 &p3, Color color,
+void draw_filled_triangle(Vec3 &p1, Vec3 &p2, Vec3 &p3, Color color,
                         ZBuffer &zbuffer) {
   // simple FTFB rasterizer
   SortPoints(p1, p2, p3);
@@ -168,7 +169,7 @@ void DrawFilledTriangle(Vec3 &p1, Vec3 &p2, Vec3 &p3, Color color,
       }
 
       for (i32 x = x_start; x <= x_end; x += 1) {
-        JDrawPixel(x, y, p1, p2, p3, color, zbuffer);
+        j_draw_pixel(x, y, p1, p2, p3, color, zbuffer);
       }
     }
   }
@@ -189,35 +190,35 @@ void DrawFilledTriangle(Vec3 &p1, Vec3 &p2, Vec3 &p3, Color color,
       }
 
       for (i32 x = x_start; x <= x_end; x += 1) {
-        JDrawPixel(x, y, p1, p2, p3, color, zbuffer);
+        j_draw_pixel(x, y, p1, p2, p3, color, zbuffer);
       }
     }
   }
 }
 
-void DrawUnlit(vector<Vec3> &vertices, vector<Triangle> &triangles,
+void draw_unlit(vector<Vec3> &vertices, vector<Triangle> &triangles,
                Matrix4x4 proj_mat, Color color, ZBuffer &zbuffer) {
   for (Triangle &tri : triangles) {
     Vec3 v1 = vertices[tri[0]];
     Vec3 v2 = vertices[tri[1]];
     Vec3 v3 = vertices[tri[2]];
 
-    if (IsBackFace(v1, v2, v3)) {
+    if (is_back_face(v1, v2, v3)) {
       continue;
     }
 
-    Vec3 p1 = ProjectToScreen(proj_mat, v1);
-    Vec3 p2 = ProjectToScreen(proj_mat, v2);
-    Vec3 p3 = ProjectToScreen(proj_mat, v3);
+    Vec3 p1 = project_to_screen(proj_mat, v1);
+    Vec3 p2 = project_to_screen(proj_mat, v2);
+    Vec3 p3 = project_to_screen(proj_mat, v3);
 
-    if (IsFaceOutsideFrustrum(p1, p2, p3)) {
+    if (is_face_outside_frustrum(p1, p2, p3)) {
       continue;
     }
-    DrawFilledTriangle(p1, p2, p3, color, zbuffer);
+    draw_filled_triangle(p1, p2, p3, color, zbuffer);
   }
 }
 
-void DrawFlatShaded(vector<Vec3> &vertices, vector<Triangle> &triangles,
+void draw_flat_shaded(vector<Vec3> &vertices, vector<Triangle> &triangles,
                     Matrix4x4 proj_mat, Light light, Color color,
                     ZBuffer &zbuffer, f32 ambient = 0.2) {
 
@@ -235,11 +236,11 @@ void DrawFlatShaded(vector<Vec3> &vertices, vector<Triangle> &triangles,
       continue;
     }
 
-    Vec3 p1 = ProjectToScreen(proj_mat, v1);
-    Vec3 p2 = ProjectToScreen(proj_mat, v2);
-    Vec3 p3 = ProjectToScreen(proj_mat, v3);
+    Vec3 p1 = project_to_screen(proj_mat, v1);
+    Vec3 p2 = project_to_screen(proj_mat, v2);
+    Vec3 p3 = project_to_screen(proj_mat, v3);
 
-    if (IsFaceOutsideFrustrum(p1, p2, p3)) {
+    if (is_face_outside_frustrum(p1, p2, p3)) {
       continue;
     }
 
@@ -247,23 +248,23 @@ void DrawFlatShaded(vector<Vec3> &vertices, vector<Triangle> &triangles,
     auto shadedColor = Color{static_cast<u8>(color.r * intesnity),
                              static_cast<u8>(color.g * intesnity),
                              static_cast<u8>(color.b * intesnity), color.a};
-    DrawFilledTriangle(p1, p2, p3, shadedColor, zbuffer);
+    draw_filled_triangle(p1, p2, p3, shadedColor, zbuffer);
   }
 }
 
-void DrawTexelFlatShaded(f32 x, f32 y, Vec3 p1, Vec3 p2, Vec3 p3, Vec2 uv1,
+void draw_texel_flat_shaded(f32 x, f32 y, Vec3 p1, Vec3 p2, Vec3 p3, Vec2 uv1,
                          Vec2 uv2, Vec2 uv3, JTexture &texture, f32 intensity,
                          ZBuffer &zbuffer) {
   auto ix = static_cast<i32>(x);
   auto iy = static_cast<i32>(y);
 
-  if (IsPointOutsideViewport(ix, iy)) {
+  if (is_point_outside_viewport(ix, iy)) {
     return;
   }
 
   Vec2 p = {x, y};
   Vec3 weights =
-      BarycentricWeights({p1.x, p1.y}, {p2.x, p2.y}, {p3.x, p3.y}, p);
+      barycentric_weights({p1.x, p1.y}, {p2.x, p2.y}, {p3.x, p3.y}, p);
   f32 alpha = weights.x;
   f32 beta = weights.y;
   f32 gamma = weights.z;
@@ -294,7 +295,7 @@ void DrawTexelFlatShaded(f32 x, f32 y, Vec3 p1, Vec3 p2, Vec3 p3, Vec2 uv1,
   }
 }
 
-void DrawTexturedTriangleFlatShaded(Vec3 &p1, Vec3 &p2, Vec3 &p3, Vec2 &uv1,
+void draw_textured_triangle_flat_shaded(Vec3 &p1, Vec3 &p2, Vec3 &p3, Vec2 &uv1,
                                     Vec2 &uv2, Vec2 &uv3, JTexture &texture,
                                     f32 intensity, ZBuffer &zbuffer) {
 
@@ -320,7 +321,7 @@ void DrawTexturedTriangleFlatShaded(Vec3 &p1, Vec3 &p2, Vec3 &p3, Vec2 &uv1,
       }
 
       for (i32 x = x_start; x <= x_end; x += 1) {
-        DrawTexelFlatShaded(x, y, p1, p2, p3, uv1, uv2, uv3, texture, intensity,
+        draw_texel_flat_shaded(x, y, p1, p2, p3, uv1, uv2, uv3, texture, intensity,
                             zbuffer);
       }
     }
@@ -342,7 +343,7 @@ void DrawTexturedTriangleFlatShaded(Vec3 &p1, Vec3 &p2, Vec3 &p3, Vec2 &uv1,
       }
 
       for (i32 x = x_start; x <= x_end; x += 1) {
-        DrawTexelFlatShaded(x, y, p1, p2, p3, uv1, uv2, uv3, texture, intensity,
+        draw_texel_flat_shaded(x, y, p1, p2, p3, uv1, uv2, uv3, texture, intensity,
                             zbuffer);
         // JDrawPixel(x, y, p1, p2, p3, color, zbuffer);
       }
@@ -350,7 +351,7 @@ void DrawTexturedTriangleFlatShaded(Vec3 &p1, Vec3 &p2, Vec3 &p3, Vec2 &uv1,
   }
 }
 
-void DrawTextureFlatShaded(vector<Vec3> &vertices, vector<Triangle> &triangles,
+void draw_texture_flat_shaded(vector<Vec3> &vertices, vector<Triangle> &triangles,
                            vector<Vec2> &uvs, Matrix4x4 proj_mat, Light light,
                            JTexture texture, ZBuffer &zbuffer,
                            f32 ambient = 0.2) {
@@ -373,21 +374,21 @@ void DrawTextureFlatShaded(vector<Vec3> &vertices, vector<Triangle> &triangles,
       continue;
     }
 
-    Vec3 p1 = ProjectToScreen(proj_mat, v1);
-    Vec3 p2 = ProjectToScreen(proj_mat, v2);
-    Vec3 p3 = ProjectToScreen(proj_mat, v3);
+    Vec3 p1 = project_to_screen(proj_mat, v1);
+    Vec3 p2 = project_to_screen(proj_mat, v2);
+    Vec3 p3 = project_to_screen(proj_mat, v3);
 
-    if (IsFaceOutsideFrustrum(p1, p2, p3)) {
+    if (is_face_outside_frustrum(p1, p2, p3)) {
       continue;
     }
 
     f32 intesnity = stdj::clamp(cross_norm.dot(light.direction), ambient, 1.0);
-    DrawTexturedTriangleFlatShaded(p1, p2, p3, uv1, uv2, uv3, texture,
+    draw_textured_triangle_flat_shaded(p1, p2, p3, uv1, uv2, uv3, texture,
                                    intesnity, zbuffer);
   }
 }
 
-void DrawTextureUnlit(vector<Vec3> &vertices, vector<Triangle> &triangles,
+void draw_texture_unlit(vector<Vec3> &vertices, vector<Triangle> &triangles,
                       vector<Vec2> &uvs, Matrix4x4 proj_mat, JTexture texture,
                       Color color, ZBuffer &zbuffer) {
 
@@ -400,19 +401,19 @@ void DrawTextureUnlit(vector<Vec3> &vertices, vector<Triangle> &triangles,
     Vec2 uv2 = uvs[tri[4]];
     Vec2 uv3 = uvs[tri[5]];
 
-    if (IsBackFace(v1, v2, v3)) {
+    if (is_back_face(v1, v2, v3)) {
       continue;
     }
 
-    Vec3 p1 = ProjectToScreen(proj_mat, v1);
-    Vec3 p2 = ProjectToScreen(proj_mat, v2);
-    Vec3 p3 = ProjectToScreen(proj_mat, v3);
+    Vec3 p1 = project_to_screen(proj_mat, v1);
+    Vec3 p2 = project_to_screen(proj_mat, v2);
+    Vec3 p3 = project_to_screen(proj_mat, v3);
 
-    if (IsFaceOutsideFrustrum(p1, p2, p3)) {
+    if (is_face_outside_frustrum(p1, p2, p3)) {
       continue;
     }
     // DrawFilledTriangle(p1, p2, p3, color, zbuffer);
-    DrawTexturedTriangleFlatShaded(p1, p2, p3, uv1, uv2, uv3, texture,
+    draw_textured_triangle_flat_shaded(p1, p2, p3, uv1, uv2, uv3, texture,
                                    1.0, // Unlit
                                    zbuffer);
   }

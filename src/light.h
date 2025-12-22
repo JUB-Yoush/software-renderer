@@ -7,7 +7,7 @@ struct Light {
   f32 strength;
 };
 
-Light MakeLight(Vec3 direction, f32 strength) {
+Light make_light(Vec3 direction, f32 strength) {
   return {
       direction.normalized(),
       strength,

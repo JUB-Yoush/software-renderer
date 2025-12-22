@@ -21,8 +21,8 @@ int main(void) {
   //     LoadTexture(ASSETS_PATH "test.png"); // Check README.md for how this
   //     works
 
-  JCamera camera = MakeCamera({0, 0, -3}, {0, 0, -1});
-  Light light = MakeLight({0, -1, 0}, 1);
+  JCamera camera = make_camera({0, 0, -3}, {0, 0, -1});
+  Light light = make_light({0, -1, 0}, 1);
   ZBuffer zbuffer;
   Vec3 translation = {0, 0, 0};
   Vec3 rotation = {0, 0, 0};
@@ -32,12 +32,11 @@ int main(void) {
 
   JTexture texture = JLoadImageFromFile(ASSETS_PATH "uv_checker_512.png");
 
-  Matrix4x4 projectionMatrix = MakeProjectionMatrix(
+  Matrix4x4 projectionMatrix = make_projection_matrix(
       FOV, SCREEN_HEIGHT, SCREEN_WIDTH, NEAR_PLANE, FAR_PLANE);
 
-  JMesh mesh = LoadMeshFromFile(ASSETS_PATH "monkey.obj");
+  JMesh mesh = load_mesh_from_file(ASSETS_PATH "monkey.obj");
   JMesh cube = MakeCube();
-  //mesh.triangles = cube.triangles;
 
   while (!WindowShouldClose()) {
 
@@ -46,21 +45,21 @@ int main(void) {
                   delta);
 
     Matrix4x4 translation_matrix =
-        MakeTranslationMatrix(translation.x, translation.y, translation.z);
+        make_translation_matrix(translation.x, translation.y, translation.z);
 
     Matrix4x4 rotation_matrix =
-        MakeRotationMatrix(rotation.x, rotation.y, rotation.z);
+        make_rotation_matrix(rotation.x, rotation.y, rotation.z);
 
-    Matrix4x4 scale_matrix = MakeScaleMatrix(scale, scale, scale);
+    Matrix4x4 scale_matrix = make_scale_matrix(scale, scale, scale);
 
     auto model_matrix =
-        Mat4Mul(translation_matrix, Mat4Mul(rotation_matrix, scale_matrix));
+        translation_matrix * (rotation_matrix * scale_matrix);
 
-    auto view_matrix = MakeViewMatrix(camera.positon, camera.target);
+    auto view_matrix = make_view_matrix(camera.positon, camera.target);
 
-    view_matrix = Mat4Mul(view_matrix, model_matrix);
+    view_matrix = view_matrix * model_matrix;
 
-    ApplyTransformations(mesh.transformed_vertices, mesh.vertices, view_matrix);
+    apply_transformations(mesh.transformed_vertices, mesh.vertices, view_matrix);
 
     BeginDrawing();
     ClearBackground(BLACK);
@@ -69,29 +68,29 @@ int main(void) {
 
     switch (render_mode) {
     case 0:
-      DrawWireFrame(mesh.transformed_vertices, mesh.triangles, projectionMatrix,
+      draw_wire_frame(mesh.transformed_vertices, mesh.triangles, projectionMatrix,
                     GREEN, false);
       DrawText("wire + backface", 0, 0, 20, WHITE);
       break;
     case 1:
-      DrawWireFrame(mesh.transformed_vertices, mesh.triangles, projectionMatrix,
+      draw_wire_frame(mesh.transformed_vertices, mesh.triangles, projectionMatrix,
                     GREEN, true);
       DrawText("wire", 0, 0, 20, WHITE);
       break;
     case 2:
-      DrawUnlit(mesh.transformed_vertices, mesh.triangles, projectionMatrix,
+      draw_unlit(mesh.transformed_vertices, mesh.triangles, projectionMatrix,
                 WHITE, zbuffer);
       DrawText("mesh, unlit", 0, 0, 20, WHITE);
       break;
 
     case 3:
-      DrawFlatShaded(mesh.transformed_vertices, mesh.triangles,
+      draw_flat_shaded(mesh.transformed_vertices, mesh.triangles,
                      projectionMatrix, light, WHITE, zbuffer);
       DrawText("mesh, lit", 0, 0, 20, WHITE);
       break;
 
     case 4:
-      DrawTextureFlatShaded(mesh.transformed_vertices, mesh.triangles, mesh.uvs,
+      draw_texture_flat_shaded(mesh.transformed_vertices, mesh.triangles, mesh.uvs,
                             projectionMatrix, light, texture, zbuffer);
       DrawText("textured + lit", 0, 0, 20, WHITE);
       break;

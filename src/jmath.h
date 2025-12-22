@@ -60,53 +60,18 @@ struct Matrix4x4 {
   }
 };
 
-Vec3 Mat4MulVec3(Matrix4x4 mat, Vec3 vec) {
-  return Vec3{
-      .x =
-          mat[0][0] * vec.x + mat[0][1] * vec.y + mat[0][2] * vec.z + mat[0][3],
-      .y =
-          mat[1][0] * vec.x + mat[1][1] * vec.y + mat[1][2] * vec.z + mat[1][3],
-      .z =
-          mat[2][0] * vec.x + mat[2][1] * vec.y + mat[2][2] * vec.z + mat[2][3],
-  };
-}
-
-Vec4 Mat4MulVec4(Matrix4x4 mat, Vec4 vec) {
-  return Vec4{
-      .x = mat[0][0] * vec.x + mat[0][1] * vec.y + mat[0][2] * vec.z +
-           mat[0][3] * vec.w,
-      .y = mat[1][0] * vec.x + mat[1][1] * vec.y + mat[1][2] * vec.z +
-           mat[1][3] * vec.w,
-      .z = mat[2][0] * vec.x + mat[2][1] * vec.y + mat[2][2] * vec.z +
-           mat[2][3] * vec.w,
-      .w = mat[3][0] * vec.x + mat[3][1] * vec.y + mat[3][2] * vec.z +
-           mat[3][3] * vec.w,
-  };
-}
-
-Matrix4x4 Mat4Mul(Matrix4x4 a, Matrix4x4 b) {
-  Matrix4x4 result;
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; j++) {
-      result.mat[i][j] = a.mat[i][0] * b.mat[0][j] + a.mat[i][1] * b.mat[1][j] +
-                         a.mat[i][2] * b.mat[2][j] + a.mat[i][3] * b.mat[3][j];
-    };
-  };
-  return result;
-}
-
-Matrix4x4 MakeTranslationMatrix(f32 x, f32 y, f32 z) {
+Matrix4x4 make_translation_matrix(f32 x, f32 y, f32 z) {
   f32 values[4][4] = {{1, 0, 0, x}, {0, 1, 0, y}, {0, 0, 1, z}, {0, 0, 0, 1}};
-  return Matrix4x4(values);
+  return {values};
 }
 
-Matrix4x4 MakeScaleMatrix(f32 sx, f32 sy, f32 sz) {
+Matrix4x4 make_scale_matrix(f32 sx, f32 sy, f32 sz) {
   f32 values[4][4] = {
       {sx, 0, 0, 0}, {0, sy, 0, 0}, {0, 0, sz, 0}, {0, 0, 0, 1}};
-  return Matrix4x4(values);
+  return {values};
 }
 
-Matrix4x4 MakeRotationMatrix(f32 pitch, f32 yaw, f32 roll) {
+Matrix4x4 make_rotation_matrix(f32 pitch, f32 yaw, f32 roll) {
   f32 alpha = yaw * DEG_TO_RAD;
   f32 beta = pitch * DEG_TO_RAD;
   f32 gamma = roll * DEG_TO_RAD;
@@ -128,7 +93,7 @@ Matrix4x4 MakeRotationMatrix(f32 pitch, f32 yaw, f32 roll) {
   return Matrix4x4(values);
 };
 
-Matrix4x4 MakeViewMatrix(Vec3 eye, Vec3 target) {
+Matrix4x4 make_view_matrix(Vec3 eye, Vec3 target) {
   Vec3 forward = (eye - target).normalized();
   Vec3 right = Vec3{0, 1, 0}.cross(forward);
   Vec3 up = forward.cross(right);
@@ -139,7 +104,7 @@ Matrix4x4 MakeViewMatrix(Vec3 eye, Vec3 target) {
   return Matrix4x4(values);
 };
 
-Matrix4x4 MakeProjectionMatrix(f32 fov, i32 screenHeight, i32 screenWidth,
+Matrix4x4 make_projection_matrix(f32 fov, i32 screenHeight, i32 screenWidth,
                                f32 near, f32 far) {
   f32 f = 1.0 / tan(fov * 0.5 * DEG_TO_RAD);
   f32 aspect = f32(screenWidth) / f32(screenHeight);
@@ -151,7 +116,7 @@ Matrix4x4 MakeProjectionMatrix(f32 fov, i32 screenHeight, i32 screenWidth,
   return Matrix4x4(values);
 }
 
-Vec3 BarycentricWeights(Vec2 a, Vec2 b, Vec2 c, Vec2 p) {
+Vec3 barycentric_weights(Vec2 a, Vec2 b, Vec2 c, Vec2 p) {
   // get vectors between verts, as well as vec to point
   Vec2 ac = c - a;
   Vec2 ab = b - a;
