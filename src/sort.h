@@ -4,21 +4,16 @@
 using namespace std;
 
 void SortPoints(Vec3 &p1, Vec3 &p2, Vec3 &p3) {
+  // sort y values in decending order p3 > p2 > p1
   if (p1.y > p2.y) {
-    swap(p1.x, p2.x);
-    swap(p1.y, p2.y);
-    swap(p1.z, p2.z);
+    swap(p1, p2);
   }
 
   if (p2.y > p3.y) {
-    swap(p2.x, p3.x);
-    swap(p2.y, p3.y);
-    swap(p2.z, p3.z);
+    swap(p2, p3);
   }
 
   if (p1.y > p2.y) {
-    swap(p1.x, p2.x);
-    swap(p1.y, p2.y);
-    swap(p1.z, p2.z);
+    swap(p1, p2);
   }
 }

@@ -4,7 +4,7 @@
 #include "jinput.h"
 #include "jmath.h"
 #include "raylib.h"
-#include "zubffer.h"
+#include "zbuffer.h"
 #include <iostream>
 
 // #define SCREEN_WIDTH (800)
@@ -26,7 +26,7 @@ int main(void) {
   Vec3 rotation = {0, 0, 0};
   f32 scale = 1.0;
   i8 render_modes_count = 3;
-  i8 render_mode = render_modes_count - 2;
+  i8 render_mode = render_modes_count - 1;
 
   Matrix4x4 projectionMatrix = MakeProjectionMatrix(
       FOV, SCREEN_HEIGHT, SCREEN_WIDTH, NEAR_PLANE, FAR_PLANE);

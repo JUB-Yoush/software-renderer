@@ -48,7 +48,10 @@ struct Vec3 {
     };
   }
 
-  Vec3 floor_xy() { return {floor(x), floor(y), z}; }
+  void floor_xy() {
+    x = floor(x);
+    y = floor(y);
+  }
 
   f32 dot(Vec3 v2) { return x * v2.x + y * v2.y + z * v2.z; }
 };

@@ -6,7 +6,7 @@
 #include "jvectors.h"
 #include "raylib.h"
 #include "sort.h"
-#include "zubffer.h"
+#include "zbuffer.h"
 #include <cmath>
 #include <cstdio>
 
@@ -104,9 +104,10 @@ bool IsPointOutsideViewport(i32 x, i32 y) {
 }
 
 void JDrawPixel(f32 x, f32 y, Vec3 p1, Vec3 p2, Vec3 p3, Color color,
-                ZBuffer zbuffer) {
-  i32 ix = i32(x);
-  i32 iy = i32(y);
+                ZBuffer &zbuffer) {
+  i32 ix = static_cast<i32>(x);
+  i32 iy = static_cast<i32>(y);
+
   if (IsPointOutsideViewport(ix, iy)) {
     return;
   }
@@ -122,15 +123,16 @@ void JDrawPixel(f32 x, f32 y, Vec3 p1, Vec3 p2, Vec3 p3, Color color,
   f32 depth = 1.0 / denom;
 
   i32 zindex = SCREEN_WIDTH * iy + ix;
+  f32 buffer_value = zbuffer.buff[zindex];
 
-  if (depth < zbuffer.buff[zindex]) {
+if (depth < buffer_value) {
     DrawPixel(ix, iy, color);
     zbuffer.buff[zindex] = depth;
   }
 }
 
 void DrawFilledTriangle(Vec3 &p1, Vec3 &p2, Vec3 &p3, Color color,
-                        ZBuffer zbuffer) {
+                        ZBuffer &zbuffer) {
   // simple FTFB rasterizer
   SortPoints(p1, p2, p3);
 
@@ -138,15 +140,19 @@ void DrawFilledTriangle(Vec3 &p1, Vec3 &p2, Vec3 &p3, Color color,
   p2.floor_xy();
   p3.floor_xy();
 
-  // dont split if triangle is already flat bottom or flat top
+  // flat bottom
   if (p2.y != p1.y) {
-    f32 inv_slope1 = (p2.x - p1.x) / (p2.y - p1.y);
-    f32 inv_slope2 = (p3.x - p1.x) / (p3.y - p1.y);
+    f32 inverse_slope1 = (p2.x - p1.x) / (p2.y - p1.y);
+    f32 inverse_slope2 = (p3.x - p1.x) / (p3.y - p1.y);
 
     for (i32 y = p1.y; y <= p2.y; y++) {
 
-      f32 x_start = p1.x + (y - p1.y) * inv_slope1;
-      f32 x_end = p1.x + (y - p1.y) * inv_slope2;
+      // if (y == 250) {
+      //   fmt::print("next one i swear");
+      // }
+
+      f32 x_start = p1.x + (y - p1.y) * inverse_slope1;
+      f32 x_end = p1.x + (y - p1.y) * inverse_slope2;
 
       if (x_start > x_end) {
         swap(x_start, x_end);
@@ -157,14 +163,17 @@ void DrawFilledTriangle(Vec3 &p1, Vec3 &p2, Vec3 &p3, Color color,
       }
     }
   }
-  fmt::print("out of first loop");
 
-  if (p3.y != p1.y) {
+  // flat top
+  if (p3.y != p1.y && p3.y != p2.y) {
     f32 inv_slope1 = (p3.x - p2.x) / (p3.y - p2.y);
     f32 inv_slope2 = (p3.x - p1.x) / (p3.y - p1.y);
 
     for (i32 y = p2.y; y <= p3.y; y++) {
 
+      // if (y == 512) {
+      //   fmt::print("next one i swear");
+      // }
       f32 x_start = p2.x + (y - p2.y) * inv_slope1;
       f32 x_end = p1.x + (y - p1.y) * inv_slope2;
 
@@ -173,6 +182,8 @@ void DrawFilledTriangle(Vec3 &p1, Vec3 &p2, Vec3 &p3, Color color,
       }
 
       for (i32 x = x_start; x <= x_end; x += 1) {
+        // if (y == 512 && x == 600) {
+        // }
         JDrawPixel(x, y, p1, p2, p3, color, zbuffer);
       }
     }
@@ -180,8 +191,8 @@ void DrawFilledTriangle(Vec3 &p1, Vec3 &p2, Vec3 &p3, Color color,
   i32 foo = 3;
 }
 
-void DrawUnlit(vector<Vec3> vertices, vector<Triangle> triangles,
-               Matrix4x4 proj_mat, Color color, ZBuffer zbuffer) {
+void DrawUnlit(vector<Vec3> &vertices, vector<Triangle> &triangles,
+               Matrix4x4 proj_mat, Color color, ZBuffer &zbuffer) {
   for (Triangle &tri : triangles) {
     Vec3 v1 = vertices[tri[0]];
     Vec3 v2 = vertices[tri[1]];
