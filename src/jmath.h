@@ -24,7 +24,7 @@ struct Matrix4x4 {
 
   const f32 *operator[](i32 i) const { return mat[i]; }
 
-  Matrix4x4 operator*(const Matrix4x4 &b) {
+  Matrix4x4 operator*(const Matrix4x4 &b) const {
     Matrix4x4 result;
     for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
@@ -35,7 +35,7 @@ struct Matrix4x4 {
     return result;
   }
 
-  Vec3 operator*(Vec3 &vec) {
+  Vec3 operator*(const Vec3 &vec) const {
     return Vec3{
         .x = mat[0][0] * vec.x + mat[0][1] * vec.y + mat[0][2] * vec.z +
              mat[0][3],
@@ -46,7 +46,7 @@ struct Matrix4x4 {
     };
   }
 
-  Vec4 operator*(Vec4 &vec) {
+  Vec4 operator*(const Vec4 &vec) const {
     return Vec4{
         .x = mat[0][0] * vec.x + mat[0][1] * vec.y + mat[0][2] * vec.z +
              mat[0][3] * vec.w,
