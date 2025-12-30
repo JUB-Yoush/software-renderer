@@ -13,11 +13,12 @@
 #include <cmath>
 #include <cstdio>
 
+#include "raymath.h"
 #include "fmt/xchar.h"
 using namespace std;
 
 void apply_transformations(vector<Vec3> &transformed, vector<Vec3> original,
-                          Matrix4x4 mat) {
+                           Matrix4x4 mat) {
   for (i32 i = 0; i < original.size(); i++) {
     transformed[i] = mat * original[i];
   }
@@ -77,7 +78,7 @@ bool is_face_outside_frustrum(Vec3 p1, Vec3 p2, Vec3 p3) {
 
 Vec3 project_to_screen(Matrix4x4 mat, Vec3 p) {
   Vec4 clip = Vec4{p.x, p.y, p.z, 1};
-  clip = (mat * clip );
+  clip = (mat * clip);
   f32 inv_w = 1.0 / clip.w;
   f32 ndc_x = clip.x * inv_w;
   f32 ndc_y = clip.y * inv_w;
@@ -87,11 +88,11 @@ Vec3 project_to_screen(Matrix4x4 mat, Vec3 p) {
   return Vec3{screen_x, screen_y, inv_w};
 }
 
-void draw_wire_frame(vector<Vec3> &vertices, vector<Triangle> &triangles,
-                   Matrix4x4 &proj_mat, Color color, bool cull_back_face
+void draw_wire_frame(const vector<Vec3> &vertices, vector<Triangle> &triangles,
+                     const Matrix4x4 &proj_mat, Color color, bool cull_back_face, bool filled = false
 
 ) {
-  for (Triangle &tri : triangles) {
+  for (Triangle &tri: triangles) {
     Vec3 v1 = vertices[tri[0]];
     Vec3 v2 = vertices[tri[1]];
     Vec3 v3 = vertices[tri[2]];
@@ -107,9 +108,14 @@ void draw_wire_frame(vector<Vec3> &vertices, vector<Triangle> &triangles,
     if (is_face_outside_frustrum(p1, p2, p3)) {
       continue;
     }
-    j_draw_line(Vec2{p1.x, p1.y}, Vec2{p2.x, p2.y}, color);
-    j_draw_line(Vec2{p2.x, p2.y}, Vec2{p3.x, p3.y}, color);
-    j_draw_line(Vec2{p3.x, p3.y}, Vec2{p1.x, p1.y}, color);
+    if (filled) {
+      DrawTriangle({p1.x, p1.y}, {p3.x, p3.y}, {p2.x, p2.y}, color);
+    } else {
+      DrawTriangleLines(Vector2{p1.x, p1.y}, Vector2{p2.x, p2.y}, Vector2{p3.x, p3.y}, color);
+    }
+    // j_draw_line(Vec2{p1.x, p1.y}, Vec2{p2.x, p2.y}, color);
+    // j_draw_line(Vec2{p2.x, p2.y}, Vec2{p3.x, p3.y}, color);
+    // j_draw_line(Vec2{p3.x, p3.y}, Vec2{p1.x, p1.y}, color);
   }
 }
 
@@ -118,7 +124,7 @@ bool is_point_outside_viewport(i32 x, i32 y) {
 }
 
 void j_draw_pixel(f32 x, f32 y, Vec3 p1, Vec3 p2, Vec3 p3, Color color,
-                ZBuffer &zbuffer) {
+                  ZBuffer &zbuffer) {
   i32 ix = static_cast<i32>(x);
   i32 iy = static_cast<i32>(y);
 
@@ -146,9 +152,9 @@ void j_draw_pixel(f32 x, f32 y, Vec3 p1, Vec3 p2, Vec3 p3, Color color,
 }
 
 void draw_filled_triangle(Vec3 &p1, Vec3 &p2, Vec3 &p3, Color color,
-                        ZBuffer &zbuffer) {
+                          ZBuffer &zbuffer) {
   // simple FTFB rasterizer
-  SortPoints(p1, p2, p3);
+  sort_points(p1, p2, p3);
 
   p1.floor_xy();
   p2.floor_xy();
@@ -160,7 +166,6 @@ void draw_filled_triangle(Vec3 &p1, Vec3 &p2, Vec3 &p3, Color color,
     f32 inverse_slope2 = (p3.x - p1.x) / (p3.y - p1.y);
 
     for (i32 y = p1.y; y <= p2.y; y++) {
-
       f32 x_start = p1.x + (y - p1.y) * inverse_slope1;
       f32 x_end = p1.x + (y - p1.y) * inverse_slope2;
 
@@ -176,12 +181,12 @@ void draw_filled_triangle(Vec3 &p1, Vec3 &p2, Vec3 &p3, Color color,
 
   // flat top
   if (p3.y != p1.y &&
-      p3.y != p2.y) { // odin impl only checks p3.y != p1.y, no idea why
+      p3.y != p2.y) {
+    // odin impl only checks p3.y != p1.y, no idea why
     f32 inv_slope1 = (p3.x - p2.x) / (p3.y - p2.y);
     f32 inv_slope2 = (p3.x - p1.x) / (p3.y - p1.y);
 
     for (i32 y = p2.y; y <= p3.y; y++) {
-
       f32 x_start = p2.x + (y - p2.y) * inv_slope1;
       f32 x_end = p1.x + (y - p1.y) * inv_slope2;
 
@@ -196,9 +201,9 @@ void draw_filled_triangle(Vec3 &p1, Vec3 &p2, Vec3 &p3, Color color,
   }
 }
 
-void draw_unlit(vector<Vec3> &vertices, vector<Triangle> &triangles,
-               Matrix4x4 proj_mat, Color color, ZBuffer &zbuffer) {
-  for (Triangle &tri : triangles) {
+void draw_unlit(const vector<Vec3> &vertices, vector<Triangle> &triangles,
+                const Matrix4x4 &proj_mat, Color color, ZBuffer &zbuffer) {
+  for (Triangle &tri: triangles) {
     Vec3 v1 = vertices[tri[0]];
     Vec3 v2 = vertices[tri[1]];
     Vec3 v3 = vertices[tri[2]];
@@ -214,16 +219,16 @@ void draw_unlit(vector<Vec3> &vertices, vector<Triangle> &triangles,
     if (is_face_outside_frustrum(p1, p2, p3)) {
       continue;
     }
+    //DrawTriangle(Vector2{p1.x, p1.y}, Vector2{p2.x, p2.y},Vector2{p3.x, p3.y}, WHITE);
     draw_filled_triangle(p1, p2, p3, color, zbuffer);
   }
 }
 
 void draw_flat_shaded(vector<Vec3> &vertices, vector<Triangle> &triangles,
-                    Matrix4x4 proj_mat, Light light, Color color,
-                    ZBuffer &zbuffer, f32 ambient = 0.2) {
-
-  for (Triangle &tri : triangles) {
-
+                      Matrix4x4 proj_mat, Light light, Color color,
+                      ZBuffer &zbuffer, f32 ambient = 0.2, bool render_trianges = false) {
+  auto sorted_tris = triangles;
+  for (Triangle &tri: triangles) {
     Vec3 v1 = vertices[tri[0]];
     Vec3 v2 = vertices[tri[1]];
     Vec3 v3 = vertices[tri[2]];
@@ -245,16 +250,30 @@ void draw_flat_shaded(vector<Vec3> &vertices, vector<Triangle> &triangles,
     }
 
     f32 intesnity = stdj::clamp(cross_norm.dot(light.direction), ambient, 1.0);
-    auto shadedColor = Color{static_cast<u8>(color.r * intesnity),
-                             static_cast<u8>(color.g * intesnity),
-                             static_cast<u8>(color.b * intesnity), color.a};
-    draw_filled_triangle(p1, p2, p3, shadedColor, zbuffer);
+    auto shadedColor = Color{
+      static_cast<u8>(color.r * intesnity),
+      static_cast<u8>(color.g * intesnity),
+      static_cast<u8>(color.b * intesnity), color.a
+    };
+    if (render_trianges) {
+      //sort_points(p1, p2, p3);
+
+      // p1.floor_xy();
+      // p2.floor_xy();
+      // p3.floor_xy();
+
+      // vector<Vec2> vecs = ccw_order({p1.x, p1.y}, {p2.x, p2.y}, {p3.x, p3.y});
+      // DrawTriangle(Vector2(vecs[2]), Vector2(vecs[1]), Vector2(vecs[0]), shadedColor);
+      DrawTriangle({p3.x, p3.y}, {p2.x, p2.y}, {p1.x, p1.y}, shadedColor);
+    } else {
+      draw_filled_triangle(p1, p2, p3, shadedColor, zbuffer);
+    }
   }
 }
 
 void draw_texel_flat_shaded(f32 x, f32 y, Vec3 p1, Vec3 p2, Vec3 p3, Vec2 uv1,
-                         Vec2 uv2, Vec2 uv3, JTexture &texture, f32 intensity,
-                         ZBuffer &zbuffer) {
+                            Vec2 uv2, Vec2 uv3, JTexture &texture, f32 intensity,
+                            ZBuffer &zbuffer) {
   auto ix = static_cast<i32>(x);
   auto iy = static_cast<i32>(y);
 
@@ -288,19 +307,20 @@ void draw_texel_flat_shaded(f32 x, f32 y, Vec3 p1, Vec3 p2, Vec3 p3, Vec2 uv1,
     auto tex = texture.pixels[texY * texture.width + texX];
 
     auto shadedTex =
-        Color{u8(f32(tex.r) * intensity), u8(f32(tex.g) * intensity),
-              u8(f32(tex.b) * intensity), tex.a};
+        Color{
+          u8(f32(tex.r) * intensity), u8(f32(tex.g) * intensity),
+          u8(f32(tex.b) * intensity), tex.a
+        };
     DrawPixel(ix, iy, shadedTex);
     zbuffer.buff[zindex] = depth;
   }
 }
 
 void draw_textured_triangle_flat_shaded(Vec3 &p1, Vec3 &p2, Vec3 &p3, Vec2 &uv1,
-                                    Vec2 &uv2, Vec2 &uv3, JTexture &texture,
-                                    f32 intensity, ZBuffer &zbuffer) {
-
+                                        Vec2 &uv2, Vec2 &uv3, JTexture &texture,
+                                        f32 intensity, ZBuffer &zbuffer) {
   // simple FTFB rasterizer
-  SortPoints(p1, p2, p3);
+  sort_points(p1, p2, p3);
 
   p1.floor_xy();
   p2.floor_xy();
@@ -312,7 +332,6 @@ void draw_textured_triangle_flat_shaded(Vec3 &p1, Vec3 &p2, Vec3 &p3, Vec2 &uv1,
     f32 inverse_slope2 = (p3.x - p1.x) / (p3.y - p1.y);
 
     for (i32 y = p1.y; y <= p2.y; y++) {
-
       f32 x_start = p1.x + (y - p1.y) * inverse_slope1;
       f32 x_end = p1.x + (y - p1.y) * inverse_slope2;
 
@@ -322,19 +341,19 @@ void draw_textured_triangle_flat_shaded(Vec3 &p1, Vec3 &p2, Vec3 &p3, Vec2 &uv1,
 
       for (i32 x = x_start; x <= x_end; x += 1) {
         draw_texel_flat_shaded(x, y, p1, p2, p3, uv1, uv2, uv3, texture, intensity,
-                            zbuffer);
+                               zbuffer);
       }
     }
   }
 
   // flat top
   if (p3.y != p1.y &&
-      p3.y != p2.y) { // odin impl only checks p3.y != p1.y, no idea why
+      p3.y != p2.y) {
+    // odin impl only checks p3.y != p1.y, no idea why
     f32 inv_slope1 = (p3.x - p2.x) / (p3.y - p2.y);
     f32 inv_slope2 = (p3.x - p1.x) / (p3.y - p1.y);
 
     for (i32 y = p2.y; y <= p3.y; y++) {
-
       f32 x_start = p2.x + (y - p2.y) * inv_slope1;
       f32 x_end = p1.x + (y - p1.y) * inv_slope2;
 
@@ -344,7 +363,7 @@ void draw_textured_triangle_flat_shaded(Vec3 &p1, Vec3 &p2, Vec3 &p3, Vec2 &uv1,
 
       for (i32 x = x_start; x <= x_end; x += 1) {
         draw_texel_flat_shaded(x, y, p1, p2, p3, uv1, uv2, uv3, texture, intensity,
-                            zbuffer);
+                               zbuffer);
         // JDrawPixel(x, y, p1, p2, p3, color, zbuffer);
       }
     }
@@ -352,12 +371,10 @@ void draw_textured_triangle_flat_shaded(Vec3 &p1, Vec3 &p2, Vec3 &p3, Vec2 &uv1,
 }
 
 void draw_texture_flat_shaded(vector<Vec3> &vertices, vector<Triangle> &triangles,
-                           vector<Vec2> &uvs, Matrix4x4 proj_mat, Light light,
-                           JTexture texture, ZBuffer &zbuffer,
-                           f32 ambient = 0.2) {
-
-  for (Triangle &tri : triangles) {
-
+                              vector<Vec2> &uvs, Matrix4x4 proj_mat, Light light,
+                              JTexture texture, ZBuffer &zbuffer,
+                              f32 ambient = 0.2) {
+  for (Triangle &tri: triangles) {
     Vec3 v1 = vertices[tri[0]];
     Vec3 v2 = vertices[tri[1]];
     Vec3 v3 = vertices[tri[2]];
@@ -384,15 +401,14 @@ void draw_texture_flat_shaded(vector<Vec3> &vertices, vector<Triangle> &triangle
 
     f32 intesnity = stdj::clamp(cross_norm.dot(light.direction), ambient, 1.0);
     draw_textured_triangle_flat_shaded(p1, p2, p3, uv1, uv2, uv3, texture,
-                                   intesnity, zbuffer);
+                                       intesnity, zbuffer);
   }
 }
 
 void draw_texture_unlit(vector<Vec3> &vertices, vector<Triangle> &triangles,
-                      vector<Vec2> &uvs, Matrix4x4 proj_mat, JTexture texture,
-                      Color color, ZBuffer &zbuffer) {
-
-  for (Triangle &tri : triangles) {
+                        vector<Vec2> &uvs, Matrix4x4 proj_mat, JTexture texture,
+                        Color color, ZBuffer &zbuffer) {
+  for (Triangle &tri: triangles) {
     Vec3 v1 = vertices[tri[0]];
     Vec3 v2 = vertices[tri[1]];
     Vec3 v3 = vertices[tri[2]];
@@ -414,7 +430,7 @@ void draw_texture_unlit(vector<Vec3> &vertices, vector<Triangle> &triangles,
     }
     // DrawFilledTriangle(p1, p2, p3, color, zbuffer);
     draw_textured_triangle_flat_shaded(p1, p2, p3, uv1, uv2, uv3, texture,
-                                   1.0, // Unlit
-                                   zbuffer);
+                                       1.0, // Unlit
+                                       zbuffer);
   }
 }

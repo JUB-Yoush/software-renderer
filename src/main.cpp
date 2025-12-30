@@ -17,10 +17,6 @@ int main(void) {
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE);
   SetTargetFPS(30);
 
-  // Texture2D texture =
-  //     LoadTexture(ASSETS_PATH "test.png"); // Check README.md for how this
-  //     works
-
   JCamera camera = make_camera({0, 0, -3}, {0, 0, -1});
   Light light = make_light({0, -1, 0}, 1);
   ZBuffer zbuffer;
@@ -28,18 +24,17 @@ int main(void) {
   Vec3 rotation = {0, 0, 0};
   f32 scale = 1.0;
   i8 render_modes_count = 5;
-  i8 render_mode = render_modes_count - 1;
+  i8 render_mode = 0;
 
-  JTexture texture = JLoadImageFromFile(ASSETS_PATH "uv_checker_512.png");
+  JTexture texture = j_load_image_from_file(ASSETS_PATH "uv_checker_512.png");
 
   Matrix4x4 projectionMatrix = make_projection_matrix(
-      FOV, SCREEN_HEIGHT, SCREEN_WIDTH, NEAR_PLANE, FAR_PLANE);
+    FOV, SCREEN_HEIGHT, SCREEN_WIDTH, NEAR_PLANE, FAR_PLANE);
 
   JMesh mesh = load_mesh_from_file(ASSETS_PATH "monkey.obj");
   JMesh cube = MakeCube();
 
   while (!WindowShouldClose()) {
-
     f32 delta = GetFrameTime();
     handle_inputs(translation, rotation, scale, render_mode, render_modes_count,
                   delta);
@@ -63,37 +58,45 @@ int main(void) {
 
     BeginDrawing();
     ClearBackground(BLACK);
+    //DrawFPS(0, 20);
 
     ClearZBuffer(zbuffer);
-
+    //DrawTriangle({0, 0}, {10, 5}, {5, 10},GREEN);
+    DrawTriangle({0, 0}, {5, 10}, {10, 5}, GREEN);
     switch (render_mode) {
-    case 0:
-      draw_wire_frame(mesh.transformed_vertices, mesh.triangles, projectionMatrix,
-                    GREEN, false);
-      DrawText("wire + backface", 0, 0, 20, WHITE);
-      break;
-    case 1:
-      draw_wire_frame(mesh.transformed_vertices, mesh.triangles, projectionMatrix,
-                    GREEN, true);
-      DrawText("wire", 0, 0, 20, WHITE);
-      break;
-    case 2:
-      draw_unlit(mesh.transformed_vertices, mesh.triangles, projectionMatrix,
-                WHITE, zbuffer);
-      DrawText("mesh, unlit", 0, 0, 20, WHITE);
-      break;
+      case 0:
+        draw_wire_frame(mesh.transformed_vertices, mesh.triangles, projectionMatrix,
+                        GREEN, false);
+        DrawText("wire + backface", 0, 0, 20, WHITE);
+        break;
+      case 1:
+        draw_wire_frame(mesh.transformed_vertices, mesh.triangles, projectionMatrix,
+                        GREEN, true);
+        DrawText("wire", 0, 0, 20, WHITE);
+        break;
+      case 2:
+        draw_unlit(mesh.transformed_vertices, mesh.triangles, projectionMatrix,
+                   WHITE, zbuffer);
+        DrawText("mesh, unlit", 0, 0, 20, WHITE);
+        break;
 
-    case 3:
-      draw_flat_shaded(mesh.transformed_vertices, mesh.triangles,
-                     projectionMatrix, light, WHITE, zbuffer);
-      DrawText("mesh, lit", 0, 0, 20, WHITE);
-      break;
+      case 3:
+        draw_flat_shaded(mesh.transformed_vertices, mesh.triangles,
+                         projectionMatrix, light, WHITE, zbuffer, 0.2, false);
+        DrawText("mesh, lit, pixel based", 0, 0, 20, WHITE);
+        break;
 
-    case 4:
-      draw_texture_flat_shaded(mesh.transformed_vertices, mesh.triangles, mesh.uvs,
-                            projectionMatrix, light, texture, zbuffer);
-      DrawText("textured + lit", 0, 0, 20, WHITE);
-      break;
+      case 4:
+        draw_flat_shaded(mesh.transformed_vertices, mesh.triangles,
+                         projectionMatrix, light, WHITE, zbuffer, 0.2, true);
+        DrawText("mesh, lit, triangle based", 0, 0, 20, WHITE);
+        break;
+
+      case 5:
+        draw_texture_flat_shaded(mesh.transformed_vertices, mesh.triangles, mesh.uvs,
+                                 projectionMatrix, light, texture, zbuffer);
+        DrawText("textured + lit", 0, 0, 20, WHITE);
+        break;
     }
 
     EndDrawing();

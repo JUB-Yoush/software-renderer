@@ -6,6 +6,8 @@
 #include <math.h>
 #include <vector>
 
+#include "raylib.h"
+
 using namespace std;
 
 // TODO implement operator overloading
@@ -16,6 +18,12 @@ struct Vec2 {
   Vec2 operator+(const Vec2 &v2) { return Vec2{x + v2.x, y + v2.y}; }
   Vec2 operator-(const Vec2 &v2) { return Vec2{x - v2.x, y - v2.y}; }
   Vec2 operator*(const Vec2 &v2) { return Vec2{x * v2.x, y * v2.y}; }
+  bool operator==(const Vec2 &v2) { return x == v2.x && y == v2.y; };
+  // bool operator<(const Vec2 &v2) { return x < v2.x && y < v2.y; };
+  // bool operator>(const Vec2 &v2) { return x > v2.x && y > v2.y; };
+  explicit operator Vector2() const {
+    return Vector2{x, y};
+  }
 };
 
 struct Vec3 {
@@ -34,17 +42,17 @@ struct Vec3 {
     }
 
     return {
-        x / len,
-        y / len,
-        z / len,
+      x / len,
+      y / len,
+      z / len,
     };
   }
 
   Vec3 cross(Vec3 v2) {
     return Vec3{
-        y * v2.z - z * v2.y,
-        z * v2.x - x * v2.z,
-        x * v2.y - y * v2.x,
+      y * v2.z - z * v2.y,
+      z * v2.x - x * v2.z,
+      x * v2.y - y * v2.x,
     };
   }
 

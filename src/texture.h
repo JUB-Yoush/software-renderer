@@ -9,9 +9,9 @@ struct JTexture {
   Color *pixels;
 };
 
-JTexture JLoadImageFromFile(char *filename) {
+JTexture j_load_image_from_file(char *filename) {
   Image image = LoadImage(filename);
-  JTexture texture =
+  auto texture =
       JTexture{image.width, image.height, LoadImageColors(image)};
   UnloadImage(image);
   return texture;

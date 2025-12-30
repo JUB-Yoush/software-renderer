@@ -39,10 +39,22 @@ struct JMesh {
   vector<Vec3> normals;
   vector<Vec2> uvs;
   vector<Triangle> triangles;
+
+  bool sorted_z_triangles() {
+  }
 };
 
-JMesh MakeCube() {
+bool z_compare(Vec3 v1, Vec3 v2) {
+  return v1.z > v2.z;
+}
 
+vector<Vec3> sorted_z_order(vector<Vec3> vec) {
+  sort(vec.begin(), vec.end(), z_compare);
+  return vec;
+}
+
+
+JMesh MakeCube() {
   vector<Vec3> transformed_verticies;
   transformed_verticies.resize(8);
 
@@ -98,20 +110,20 @@ JMesh MakeCube() {
   triangles[10] = Triangle{5, 7, 0, 0, 1, 2, 5, 5, 5};
   triangles[11] = Triangle{5, 0, 3, 0, 2, 3, 5, 5, 5};
   return JMesh{
-      .transformed_vertices = transformed_verticies,
-      .transformed_normals = transformed_normals,
-      .vertices = vertices,
-      .normals = normals,
-      .uvs = uvs,
-      .triangles = triangles,
+    .transformed_vertices = transformed_verticies,
+    .transformed_normals = transformed_normals,
+    .vertices = vertices,
+    .normals = normals,
+    .uvs = uvs,
+    .triangles = triangles,
   };
 }
 
 Triangle make_triangle_from_obj_points(f32 points[10]) {
   Triangle tri;
   for (int i = 1; i <= 10; ++i) {
-  // obj files are 1 indexed
-    tri.points[i-1] = points[i] - 1;
+    // obj files are 1 indexed
+    tri.points[i - 1] = points[i] - 1;
   }
   return tri;
 }
@@ -133,7 +145,7 @@ JMesh load_mesh_from_file(const char *filename) {
   vector<Vec2> uvs;
 
   FILE *file = fopen(filename, "r");
-  assert(file != NULL);
+  assert(file != nullptr);
 
   bool ended = false;
   while (!ended) {
@@ -144,56 +156,53 @@ JMesh load_mesh_from_file(const char *filename) {
       ended = true;
     }
 
-    if (strcmp(head,"#") == 0) {
+    if (strcmp(head, "#") == 0) {
       continue;
-    }
-
-    else if (strcmp(head,"v") == 0) {
-      Vec3 new_vert = {0,0,0};
+    } else if (strcmp(head, "v") == 0) {
+      Vec3 new_vert = {0, 0, 0};
       i32 res = fscanf(file, "%f %f %f\n", &new_vert.x, &new_vert.y, &new_vert.z);
       if (res != 3 || res == EOF) {
         ended = true;
         break;
       }
       vertices.push_back(new_vert);
-    }
-    else if (strncmp(head,"vn",2) == 0) {
-      Vec3 normal  = {0,0,0};
+    } else if (strncmp(head, "vn", 2) == 0) {
+      Vec3 normal = {0, 0, 0};
       i32 res = fscanf(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z);
 
       if (res != 3 || res == EOF) {
         ended = true;
         break;
       }
-    normals.push_back(normal);
-    }
-    else if (strncmp(head,"vt",2) == 0) {
-      Vec2 uv = {0,0};
+      normals.push_back(normal);
+    } else if (strncmp(head, "vt", 2) == 0) {
+      Vec2 uv = {0, 0};
       i32 res = fscanf(file, "%f %f\n", &uv.x, &uv.y);
       if (res != 2 || res == EOF) {
         ended = true;
         break;
       }
       uvs.push_back(uv);
-    }
-    else if (strcmp(head,"f") == 0) {
+    } else if (strcmp(head, "f") == 0) {
       f32 points[10];
       // vert/uv/normal vert/uv/normal vert/uv/normal
-      i32 res = fscanf(file, "%f/%f/%f %f/%f/%f %f/%f/%f\n", &points[1], &points[4],&points[7],&points[2],&points[5],&points[8],&points[3],&points[6],&points[9]);
+      i32 res = fscanf(file, "%f/%f/%f %f/%f/%f %f/%f/%f\n", &points[1], &points[4], &points[7], &points[2], &points[5],
+                       &points[8], &points[3], &points[6], &points[9]);
       if (res != 9 || res == EOF) {
         ended = true;
         break;
       }
-    Triangle triangle = make_triangle_from_obj_points(points);
-    triangles.push_back(triangle);
+      Triangle triangle = make_triangle_from_obj_points(points);
+      triangles.push_back(triangle);
     }
   }
   fclose(file);
   return JMesh{
-  .transformed_vertices = vertices,
-  .transformed_normals = normals,
-  .vertices = vertices,
-  .normals = normals,
-  .uvs = uvs,
-  .triangles = triangles};
+    .transformed_vertices = vertices,
+    .transformed_normals = normals,
+    .vertices = vertices,
+    .normals = normals,
+    .uvs = uvs,
+    .triangles = triangles
+  };
 }
