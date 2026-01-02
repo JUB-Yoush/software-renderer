@@ -13,3 +13,9 @@ Light make_light(Vec3 direction, f32 strength) {
         strength,
     };
 }
+
+void setup_light(Light *light, Vec3 direction, f32 strength) {
+    light->direction = direction.normalized();
+    light->strength = strength;
+}
+
