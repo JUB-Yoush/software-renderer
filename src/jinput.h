@@ -36,7 +36,6 @@ void handle_inputs(Vec3 &translation, Vec3 &rotation, f32 &scale,
 
   if (IsKeyDown(KEY_N))
     scale += linear_step;
-
   if (IsKeyDown(KEY_M))
     scale -= linear_step;
 

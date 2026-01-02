@@ -17,14 +17,14 @@ int main(void) {
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE);
   SetTargetFPS(30);
 
-  JCamera camera = make_camera({0, 0, -3}, {0, 0, -1});
+  JCamera camera = make_camera({0, 0, 3}, {0, 0, 1});
   Light light = make_light({0, -1, 0}, 1);
-  ZBuffer zbuffer;
+  ZBuffer zbuffer{};
   Vec3 translation = {0, 0, 0};
-  Vec3 rotation = {0, 0, 0};
+  Vec3 rotation = {0, 180, 0};
   f32 scale = 1.0;
   i8 render_modes_count = 5;
-  i8 render_mode = 0;
+  i8 render_mode = 4;
 
   JTexture texture = j_load_image_from_file(ASSETS_PATH "uv_checker_512.png");
 
@@ -32,7 +32,7 @@ int main(void) {
     FOV, SCREEN_HEIGHT, SCREEN_WIDTH, NEAR_PLANE, FAR_PLANE);
 
   JMesh mesh = load_mesh_from_file(ASSETS_PATH "monkey.obj");
-  JMesh cube = MakeCube();
+  //JMesh mesh = make_rectangle(2, .5, 2);
 
   while (!WindowShouldClose()) {
     f32 delta = GetFrameTime();

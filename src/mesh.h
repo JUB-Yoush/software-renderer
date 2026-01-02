@@ -53,24 +53,26 @@ vector<Vec3> sorted_z_order(vector<Vec3> vec) {
   return vec;
 }
 
-
-JMesh MakeCube() {
-  vector<Vec3> transformed_verticies;
-  transformed_verticies.resize(8);
+JMesh make_rectangle(f32 x_len, f32 y_len, f32 z_len) {
+  const f32 x = x_len / 2;
+  const f32 y = y_len / 2;
+  const f32 z = z_len / 2;
+  vector<Vec3> transformed_vertices;
+  transformed_vertices.resize(8);
 
   vector<Vec3> transformed_normals;
   transformed_normals.resize(6);
 
   vector<Vec3> vertices;
   vertices.resize(8);
-  vertices[0] = Vec3{-1.0, -1.0, -1.0};
-  vertices[1] = Vec3{-1.0, 1.0, -1.0};
-  vertices[2] = Vec3{1.0, 1.0, -1.0};
-  vertices[3] = Vec3{1.0, -1.0, -1.0};
-  vertices[4] = Vec3{1.0, 1.0, 1.0};
-  vertices[5] = Vec3{1.0, -1.0, 1.0};
-  vertices[6] = Vec3{-1.0, 1.0, 1.0};
-  vertices[7] = Vec3{-1.0, -1.0, 1.0};
+  vertices[0] = Vec3{-x, -y, -z};
+  vertices[1] = Vec3{-x, y, -z};
+  vertices[2] = Vec3{x, y, -z};
+  vertices[3] = Vec3{x, -y, -z};
+  vertices[4] = Vec3{x, y, z};
+  vertices[5] = Vec3{x, -y, z};
+  vertices[6] = Vec3{-x, y, z};
+  vertices[7] = Vec3{-x, -y, z};
 
   vector<Vec3> normals;
   normals.resize(6);
@@ -110,13 +112,17 @@ JMesh MakeCube() {
   triangles[10] = Triangle{5, 7, 0, 0, 1, 2, 5, 5, 5};
   triangles[11] = Triangle{5, 0, 3, 0, 2, 3, 5, 5, 5};
   return JMesh{
-    .transformed_vertices = transformed_verticies,
+    .transformed_vertices = transformed_vertices,
     .transformed_normals = transformed_normals,
     .vertices = vertices,
     .normals = normals,
     .uvs = uvs,
     .triangles = triangles,
   };
+}
+
+inline JMesh make_cube() {
+  return make_rectangle(0, 0, 0);
 }
 
 Triangle make_triangle_from_obj_points(f32 points[10]) {

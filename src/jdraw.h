@@ -249,7 +249,7 @@ void draw_flat_shaded(vector<Vec3> &vertices, vector<Triangle> &triangles,
       continue;
     }
 
-    f32 intesnity = stdj::clamp(cross_norm.dot(light.direction), ambient, 1.0);
+    f32 intesnity = std::clamp(cross_norm.dot(light.direction), ambient, 1.0f);
     auto shadedColor = Color{
       static_cast<u8>(color.r * intesnity),
       static_cast<u8>(color.g * intesnity),
@@ -399,7 +399,7 @@ void draw_texture_flat_shaded(vector<Vec3> &vertices, vector<Triangle> &triangle
       continue;
     }
 
-    f32 intesnity = stdj::clamp(cross_norm.dot(light.direction), ambient, 1.0);
+    f32 intesnity = std::clamp(cross_norm.dot(light.direction), ambient, 1.0f);
     draw_textured_triangle_flat_shaded(p1, p2, p3, uv1, uv2, uv3, texture,
                                        intesnity, zbuffer);
   }
