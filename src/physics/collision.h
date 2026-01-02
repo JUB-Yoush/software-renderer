@@ -1,6 +1,6 @@
 #pragma once
 #include "jlib.h"
-#include "jvectors.h"
+#include "../math/jvectors.h"
 
 struct AABB {
     f32 min_x;

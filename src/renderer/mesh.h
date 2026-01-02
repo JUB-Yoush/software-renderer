@@ -1,7 +1,7 @@
 #pragma once
 #include "fmt/base.h"
-#include "jlib.h"
-#include "jmath.h"
+#include "../jlib.h"
+#include "../math/calc.h"
 #include <assert.h>
 #include <bits/types/FILE.h>
 #include <cmath>

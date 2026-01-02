@@ -1,13 +1,13 @@
 #pragma once
-#include "world.h"
+#include "World.h"
 
 template<typename... ComponentTypes>
 struct Query {
-    world *scene_ptr{nullptr};
+    World *scene_ptr{nullptr};
     ComponentMask component_mask;
     bool all{false};
 
-    Query(world &scene) : scene_ptr(&scene) {
+    Query(World &scene) : scene_ptr(&scene) {
         if (sizeof...(ComponentTypes) == 0) {
             all = true;
         } else {
@@ -21,11 +21,11 @@ struct Query {
 
     struct Iterator {
         EntityIndex index;
-        world *scene_ptr;
+        World *scene_ptr;
         ComponentMask mask;
         bool all{false};
 
-        Iterator(world *scene_ptr, EntityIndex index, ComponentMask mask, bool all) : scene_ptr(scene_ptr),
+        Iterator(World *scene_ptr, EntityIndex index, ComponentMask mask, bool all) : scene_ptr(scene_ptr),
             index(index), mask(mask), all(all) {
         }
 
@@ -43,7 +43,7 @@ struct Query {
 
         bool valid_index() {
             //valid entity id and has the correct component mask, or we're just iterating through everything
-            bool valid_entity = world::is_entity_valid(scene_ptr->entities[index].id);
+            bool valid_entity = World::is_entity_valid(scene_ptr->entities[index].id);
             bool valid_bitmask = mask == (mask & scene_ptr->entities[index].bitmask);
             return valid_entity && (
                        all || valid_bitmask);
@@ -62,7 +62,7 @@ struct Query {
         // separate into bools
         while (first_index < scene_ptr->entities.size() && (
                    component_mask != (component_mask & scene_ptr->entities[first_index].bitmask) || !
-                   world::is_entity_valid(scene_ptr->entities[first_index].id))) {
+                   World::is_entity_valid(scene_ptr->entities[first_index].id))) {
             first_index++;
         }
         return Iterator(scene_ptr, first_index, component_mask, all);

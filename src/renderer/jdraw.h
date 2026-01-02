@@ -1,12 +1,12 @@
 #pragma once
-#include "consts.h"
+#include "../consts.h"
 #include "mesh.h"
-#include "jlib.h"
-#include "jmath.h"
-#include "jvectors.h"
+#include "../jlib.h"
+#include "../math/calc.h"
+#include "../math/jvectors.h"
 #include "light.h"
 #include "raylib.h"
-#include "sort.h"
+#include "../math/sort.h"
 #include "texture.h"
 #include "zbuffer.h"
 #include <algorithm>
@@ -15,6 +15,7 @@
 
 #include "raymath.h"
 #include "fmt/xchar.h"
+#include "math/matrix.h"
 using namespace std;
 
 void apply_transformations(vector<Vec3> &transformed, vector<Vec3> original,
@@ -113,9 +114,6 @@ void draw_wire_frame(const vector<Vec3> &vertices, vector<Triangle> &triangles,
     } else {
       DrawTriangleLines(Vector2{p1.x, p1.y}, Vector2{p2.x, p2.y}, Vector2{p3.x, p3.y}, color);
     }
-    // j_draw_line(Vec2{p1.x, p1.y}, Vec2{p2.x, p2.y}, color);
-    // j_draw_line(Vec2{p2.x, p2.y}, Vec2{p3.x, p3.y}, color);
-    // j_draw_line(Vec2{p3.x, p3.y}, Vec2{p1.x, p1.y}, color);
   }
 }
 

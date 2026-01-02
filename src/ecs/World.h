@@ -15,7 +15,7 @@ const int MAX_COMPONENTS = 32;
 
 typedef std::bitset<MAX_COMPONENTS> ComponentMask;
 
-struct world {
+struct World {
     struct Entity {
         EntityId id;
         ComponentMask bitmask;

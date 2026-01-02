@@ -1,27 +1,37 @@
-#include "jcamera.h"
-#include "jdraw.h"
-#include "mesh.h"
+#include "renderer/jcamera.h"
+#include "renderer/jdraw.h"
+#include "renderer/mesh.h"
 #include "jinput.h"
-#include "jmath.h"
+#include "math/calc.h"
 #include "raylib.h"
-#include "texture.h"
-#include "zbuffer.h"
+#include "renderer/texture.h"
+#include "renderer/zbuffer.h"
+#include "ecs/query.h"
+#include "ecs/World.h"
 #include <iostream>
+
+#include "jinput.h"
 
 // #define SCREEN_WIDTH (800)
 // #define SCREEN_HEIGHT (600)
 
 #define WINDOW_TITLE "Window title"
 
+void update(World &world) {
+}
+
+void draw(World &world) {
+}
+
 int main(void) {
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE);
-  SetTargetFPS(30);
+  SetTargetFPS(120);
 
-  JCamera camera = make_camera({0, 0, 3}, {0, 0, 1});
+  //JCamera camera = make_camera({0, -2, 3}, {0, 0, 1});
   Light light = make_light({0, -1, 0}, 1);
   ZBuffer zbuffer{};
   Vec3 translation = {0, 0, 0};
-  Vec3 rotation = {0, 180, 0};
+  Vec3 rotation = {0, 0, 0};
   f32 scale = 1.0;
   i8 render_modes_count = 5;
   i8 render_mode = 4;
@@ -31,13 +41,22 @@ int main(void) {
   Matrix4x4 projectionMatrix = make_projection_matrix(
     FOV, SCREEN_HEIGHT, SCREEN_WIDTH, NEAR_PLANE, FAR_PLANE);
 
-  JMesh mesh = load_mesh_from_file(ASSETS_PATH "monkey.obj");
-  //JMesh mesh = make_rectangle(2, .5, 2);
+  //JMesh mesh = load_mesh_from_file(ASSETS_PATH "monkey.obj");
+  JMesh mesh = make_rectangle(5, .5, 5);
+
+  World scene;
+  EntityId camera_id = scene.new_entity();
+  auto *cam = scene.assign<JCamera>(camera_id);
+  setup_camera(cam, {0, -2, 3}, {0, 0, 1});
+
 
   while (!WindowShouldClose()) {
-    f32 delta = GetFrameTime();
+    const f32 delta = GetFrameTime();
+
     handle_inputs(translation, rotation, scale, render_mode, render_modes_count,
                   delta);
+    update();
+    draw(scene);
 
     Matrix4x4 translation_matrix =
         make_translation_matrix(translation.x, translation.y, translation.z);
@@ -50,7 +69,7 @@ int main(void) {
     auto model_matrix =
         translation_matrix * (rotation_matrix * scale_matrix);
 
-    auto view_matrix = make_view_matrix(camera.positon, camera.target);
+    auto view_matrix = make_view_matrix(cam->positon, cam->target);
 
     view_matrix = view_matrix * model_matrix;
 
@@ -58,10 +77,9 @@ int main(void) {
 
     BeginDrawing();
     ClearBackground(BLACK);
-    //DrawFPS(0, 20);
+    DrawFPS(0, 20);
 
     ClearZBuffer(zbuffer);
-    //DrawTriangle({0, 0}, {10, 5}, {5, 10},GREEN);
     DrawTriangle({0, 0}, {5, 10}, {10, 5}, GREEN);
     switch (render_mode) {
       case 0:
@@ -106,3 +124,4 @@ int main(void) {
 
   return 0;
 }
+

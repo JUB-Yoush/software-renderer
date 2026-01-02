@@ -1,5 +1,5 @@
 #pragma once
-#include "consts.h"
+#include "../consts.h"
 
 struct ZBuffer {
   f32 buff[SCREEN_WIDTH * SCREEN_HEIGHT];

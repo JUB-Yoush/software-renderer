@@ -1,6 +1,6 @@
 #pragma once
 #include "jlib.h"
-#include "jmath.h"
+#include "math/calc.h"
 #include "raylib.h"
 
 void handle_inputs(Vec3 &translation, Vec3 &rotation, f32 &scale,

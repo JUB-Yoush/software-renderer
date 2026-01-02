@@ -1,6 +1,6 @@
 #pragma once
 
-#include "jlib.h"
+#include "../jlib.h"
 #include "raylib.h"
 #include <string>
 struct JTexture {
