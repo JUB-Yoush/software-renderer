@@ -12,6 +12,9 @@
 #include <optional>
 #include <vector>
 
+// typedef Vec3 Translation;
+// typedef Vec3 Rotation;
+
 struct Triangle {
   i32 points[9];
 
@@ -33,16 +36,31 @@ struct Triangle {
 };
 
 struct JMesh {
+  //TODO seperate immutable values to be a pointer instead of making a new copy per mesh
   vector<Vec3> transformed_vertices;
   vector<Vec3> transformed_normals;
-  vector<Vec3> vertices;
-  vector<Vec3> normals;
-  vector<Vec2> uvs;
-  vector<Triangle> triangles;
+  vector<Vec3> vertices; // can be shared
+  vector<Vec3> normals; // can be shared
+  vector<Vec2> uvs; // can be shared
+  vector<Triangle> triangles; // can be shared
 
-  bool sorted_z_triangles() {
+  static void clone(JMesh &clone_dest, const JMesh &clone_src) {
+    clone_dest.transformed_vertices = clone_src.transformed_vertices;
+    clone_dest.transformed_normals = clone_src.transformed_normals;
+    clone_dest.vertices = clone_src.vertices;
+    clone_dest.normals = clone_src.normals;
+    clone_dest.uvs = clone_src.uvs;
+    clone_dest.triangles = clone_src.triangles;
   }
 };
+
+
+struct JTransform {
+  Vec3 translation;
+  Vec3 Rotation;
+  f32 Scale;
+};
+
 
 bool z_compare(Vec3 v1, Vec3 v2) {
   return v1.z > v2.z;

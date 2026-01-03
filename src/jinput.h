@@ -1,10 +1,11 @@
 #pragma once
+#include "game.h"
 #include "jlib.h"
 #include "math/calc.h"
 #include "raylib.h"
 
 void handle_inputs(Vec3 &translation, Vec3 &rotation, f32 &scale,
-                   i8 &render_mode, i8 render_modes_count, f32 delta_time) {
+                   f32 delta_time) {
   f32 linear_step = (IsKeyDown(KEY_LEFT_SHIFT) ? 0.25 : 1) * delta_time;
   f32 angular_step = (IsKeyDown(KEY_LEFT_SHIFT) ? 12 : 48) * delta_time;
 
@@ -38,7 +39,9 @@ void handle_inputs(Vec3 &translation, Vec3 &rotation, f32 &scale,
     scale += linear_step;
   if (IsKeyDown(KEY_M))
     scale -= linear_step;
+}
 
+void update_render_mode(u8 &render_mode, u8 render_modes_count) {
   if (IsKeyPressed(KEY_LEFT)) {
     render_mode = (render_mode + render_modes_count - 1) % render_modes_count;
   } else if (IsKeyPressed(KEY_RIGHT)) {

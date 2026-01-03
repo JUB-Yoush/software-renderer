@@ -222,10 +222,9 @@ void draw_unlit(const vector<Vec3> &vertices, vector<Triangle> &triangles,
   }
 }
 
-void draw_flat_shaded(vector<Vec3> &vertices, vector<Triangle> &triangles,
+void draw_flat_shaded(const vector<Vec3> &vertices, vector<Triangle> &triangles,
                       Matrix4x4 proj_mat, Light light, Color color,
                       ZBuffer &zbuffer, f32 ambient = 0.2, bool render_trianges = false) {
-  auto sorted_tris = triangles;
   for (Triangle &tri: triangles) {
     Vec3 v1 = vertices[tri[0]];
     Vec3 v2 = vertices[tri[1]];
