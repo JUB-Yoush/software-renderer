@@ -20,7 +20,7 @@ struct Triangle {
 
   // Overload the subscript operator
   i32 &operator[](u64 index) {
-    if (index >= 0 && index < 9) {
+    if (index < 9) {
       return points[index];
     }
     throw out_of_range("Index out of range");
@@ -28,7 +28,7 @@ struct Triangle {
 
   // const version for read-only access
   const i32 &operator[](u64 index) const {
-    if (index >= 0 && index < 9) {
+    if (index < 9) {
       return points[index];
     }
     throw out_of_range("Index out of range");
@@ -43,6 +43,7 @@ struct JMesh {
   vector<Vec3> normals; // can be shared
   vector<Vec2> uvs; // can be shared
   vector<Triangle> triangles; // can be shared
+  Color color = WHITE;
 
   static void clone(JMesh &clone_dest, const JMesh &clone_src) {
     clone_dest.transformed_vertices = clone_src.transformed_vertices;
@@ -56,9 +57,9 @@ struct JMesh {
 
 
 struct JTransform {
-  Vec3 translation;
-  Vec3 Rotation;
-  f32 Scale;
+  Vec3 translation{};
+  Vec3 rotation{};
+  f32 scale = 1.0f;
 };
 
 

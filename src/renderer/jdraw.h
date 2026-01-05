@@ -18,8 +18,8 @@
 #include "math/matrix.h"
 using namespace std;
 
-void apply_transformations(vector<Vec3> &transformed, vector<Vec3> original,
-                           Matrix4x4 mat) {
+void apply_transformations(vector<Vec3> &transformed, const vector<Vec3> &original,
+                           const Matrix4x4 &mat) {
   for (i32 i = 0; i < original.size(); i++) {
     transformed[i] = mat * original[i];
   }

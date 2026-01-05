@@ -24,5 +24,7 @@ JCamera make_camera(Vec3 positon, Vec3 target) {
 void setup_camera(JCamera *cam, Vec3 positon, Vec3 target) {
   cam->positon = positon;
   cam->target = target;
+  cam->projection_matrix = make_projection_matrix(
+    FOV, SCREEN_HEIGHT, SCREEN_WIDTH, NEAR_PLANE, FAR_PLANE);
 }
 
