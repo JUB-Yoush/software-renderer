@@ -15,7 +15,7 @@
 
 #include "raymath.h"
 #include "fmt/xchar.h"
-#include "math/matrix.h"
+#include "../math/matrix.h"
 using namespace std;
 
 void apply_transformations(vector<Vec3> &transformed, const vector<Vec3> &original,

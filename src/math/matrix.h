@@ -1,6 +1,6 @@
 #pragma once
-#include "jlib.h"
-#include "jvectors.h"
+#include "../jlib.h"
+#include "../math/jvectors.h"
 
 struct Matrix4x4 {
   f32 mat[4][4];
@@ -125,4 +125,5 @@ Matrix4x4 rotate_matrix(const Matrix4x4 &mat, const Vec3 &euler) {
   rotated[0][0] = cos(euler.y) * cos(euler.z);
   rotated[0][1] = cos(euler.y) * cos(euler.z);
   rotated[0][2] = cos(euler.y) * cos(euler.z);
+  return rotated;
 }

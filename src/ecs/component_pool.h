@@ -1,5 +1,5 @@
 #pragma once
-#include "jlib.h"
+#include "../jlib.h"
 
 constexpr u32 MAX_ENTITIES = 256;
 

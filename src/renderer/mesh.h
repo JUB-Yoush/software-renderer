@@ -1,5 +1,4 @@
 #pragma once
-#include "fmt/base.h"
 #include "../jlib.h"
 #include "../math/calc.h"
 #include <assert.h>
@@ -7,10 +6,12 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <math.h>
 #include <optional>
 #include <vector>
+#include <fmt/xchar.h>
 
 // typedef Vec3 Translation;
 // typedef Vec3 Rotation;

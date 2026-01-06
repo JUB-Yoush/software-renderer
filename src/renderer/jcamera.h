@@ -1,7 +1,7 @@
 #pragma once
 #include "../math/calc.h"
-#include "ecs/World.h"
-#include "math/matrix.h"
+#include "../ecs/World.h"
+#include "../math/matrix.h"
 
 struct JCamera {
   Vec3 positon;
