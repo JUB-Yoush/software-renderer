@@ -7,9 +7,6 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
-#include <iostream>
-#include <math.h>
-#include <optional>
 #include <vector>
 #include <fmt/xchar.h>
 

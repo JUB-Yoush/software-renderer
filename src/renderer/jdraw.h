@@ -224,7 +224,7 @@ void draw_unlit(const vector<Vec3> &vertices, vector<Triangle> &triangles,
 
 void draw_flat_shaded(const vector<Vec3> &vertices, vector<Triangle> &triangles,
                       Matrix4x4 proj_mat, Light light, Color color,
-                      ZBuffer &zbuffer, f32 ambient = 0.2, bool render_trianges = false) {
+                      f32 ambient = 0.2, bool render_trianges = false) {
   for (Triangle &tri: triangles) {
     Vec3 v1 = vertices[tri[0]];
     Vec3 v2 = vertices[tri[1]];
@@ -263,7 +263,7 @@ void draw_flat_shaded(const vector<Vec3> &vertices, vector<Triangle> &triangles,
       // DrawTriangle(Vector2(vecs[2]), Vector2(vecs[1]), Vector2(vecs[0]), shadedColor);
       DrawTriangle({p3.x, p3.y}, {p2.x, p2.y}, {p1.x, p1.y}, shadedColor);
     } else {
-      draw_filled_triangle(p1, p2, p3, shadedColor, zbuffer);
+      //draw_filled_triangle(p1, p2, p3, shadedColor, zbuffer);
     }
   }
 }

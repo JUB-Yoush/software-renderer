@@ -1,6 +1,6 @@
 #pragma once
 #include "../math/calc.h"
-#include "../ecs/World.h"
+#include "../ecs/world.h"
 #include "../math/matrix.h"
 
 struct JCamera {

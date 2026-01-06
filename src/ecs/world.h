@@ -68,7 +68,7 @@ struct World {
     template<typename T>
     T *get(EntityId id) {
         assert(entities[get_entity_index(id)].id == id && "invalid entity id");
-        int component_id = get_id<T>();
+        i8 component_id = get_id<T>();
         if (!entities[get_entity_index(id)].bitmask.test(component_id)) {
             return nullptr;
         }

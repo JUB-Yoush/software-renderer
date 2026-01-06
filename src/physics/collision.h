@@ -1,5 +1,5 @@
 #pragma once
-#include "jlib.h"
+#include "../jlib.h"
 #include "../math/jvectors.h"
 
 struct AABB {

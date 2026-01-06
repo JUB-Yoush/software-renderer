@@ -1,5 +1,5 @@
 #pragma once
-#include "World.h"
+#include "world.h"
 
 template<typename... ComponentTypes>
 struct Query {

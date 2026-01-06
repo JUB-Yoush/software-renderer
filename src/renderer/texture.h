@@ -2,7 +2,6 @@
 
 #include "../jlib.h"
 #include "raylib.h"
-#include <string>
 struct JTexture {
   i32 width;
   i32 height;

@@ -1,5 +1,5 @@
 #pragma once
-#include "ecs/World.h"
+#include "ecs/world.h"
 
 // TODO make player struct bag of pointers to values in ECS
 struct Player {
@@ -25,7 +25,6 @@ struct Game {
 
     u8 render_mode = 4;
     ControlMode control_mode = CAMERA;
-    ZBuffer zbuffer;
     World world;
     JCamera *camera{};
     Light *light;

@@ -7,7 +7,7 @@
 #include "renderer/texture.h"
 #include "renderer/zbuffer.h"
 #include "ecs/query.h"
-#include "ecs/World.h"
+#include "ecs/world.h"
 #include <iostream>
 #include "game.h"
 #include "jinput.h"
@@ -119,7 +119,7 @@ void draw_models(Game &game) {
     //
     //   case 4:
     draw_flat_shaded(mesh->transformed_vertices, mesh->triangles,
-                     game.camera->projection_matrix, *game.light, mesh->color, game.zbuffer, 0.2, true);
+                     game.camera->projection_matrix, *game.light, mesh->color, 0.2, true);
     DrawText("mesh, lit, triangle based", 0, 10, 10, WHITE);
     //DrawText(, 0, 10, 10, WHITE);
     //   break;
