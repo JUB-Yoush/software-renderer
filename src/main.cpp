@@ -67,6 +67,9 @@ void poll_inputs(Game &game, float delta) {
       break;
     }
   }
+  fmt::print("{}\n", game.camera->positon.x);
+  fmt::print("{}\n", game.camera->positon.y);
+  fmt::print("{}\n", game.camera->positon.z);
 }
 
 void update_camera(Game &game) {
@@ -76,6 +79,7 @@ void update_camera(Game &game) {
   //   .z = game.camera->positon.z + 1
   // };
   game.camera->view_matrix = make_view_matrix(game.camera->positon, game.camera->target);
+  game.camera->target = {game.camera->positon.x, game.camera->positon.y, 0};
 }
 
 void update(Game &game) {
@@ -132,7 +136,7 @@ void draw_models(Game &game) {
 void draw(Game &game) {
   BeginDrawing();
   ClearBackground(BLACK);
-  DrawFPS(0, 0);
+  DrawFPS(0, 20);
   draw_models(game);
   EndDrawing();
 }
@@ -141,27 +145,6 @@ int main() {
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE);
   SetTargetFPS(120);
 
-  // //JCamera camera = make_camera({0, -2, 3}, {0, 0, 1});
-  // //Light light = make_light({0, -1, 0}, 1);
-  // ZBuffer zbuffer{};
-  //
-  // Vec3 translation = {0, 0, 0};
-  // Vec3 rotation = {0, 0, 0};
-  // f32 scale = 1.0;
-  //
-  // Vec3 cam_translation = {0, -2, 3};
-  // Vec3 cam_rotation = {0, 0, 0};
-  // f32 cam_scale = 1.0;
-  //
-  // i8 render_modes_count = 5;
-  // i8 render_mode = 4;
-  //
-  // JTexture texture = j_load_image_from_file(ASSETS_PATH "uv_checker_512.png");
-  //
-  // Matrix4x4 projectionMatrix = make_projection_matrix(
-  //   FOV, SCREEN_HEIGHT, SCREEN_WIDTH, NEAR_PLANE, FAR_PLANE);
-  //
-  // //JMesh mesh = load_mesh_from_file(ASSETS_PATH "monkey.obj");
 
   Game game;
   EntityId camera_id = game.world.new_entity();
@@ -175,7 +158,7 @@ int main() {
   game.camera = cam;
   game.light = light;
 
-  setup_camera(game.camera, {0, -2, 3}, {0, 0, 1});
+  setup_camera(game.camera, {0, -2, 8}, {0, 0, 1});
   setup_light(game.light, {0, -1, 0}, 1);
 
   // setup player

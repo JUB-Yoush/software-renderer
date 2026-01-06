@@ -117,3 +117,12 @@ Matrix4x4 make_projection_matrix(f32 fov, i32 screenHeight, i32 screenWidth,
   };
   return Matrix4x4(values);
 }
+
+// TODO make
+Matrix4x4 rotate_matrix(const Matrix4x4 &mat, const Vec3 &euler) {
+  Matrix4x4 rotated;
+
+  rotated[0][0] = cos(euler.y) * cos(euler.z);
+  rotated[0][1] = cos(euler.y) * cos(euler.z);
+  rotated[0][2] = cos(euler.y) * cos(euler.z);
+}
