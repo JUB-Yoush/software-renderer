@@ -55,7 +55,7 @@ void poll_inputs(Game &game, float delta) {
   switch (game.control_mode) {
     case Game::CAMERA: {
       f32 mi_bombo = 1;
-      handle_inputs(game.camera->positon, game.camera->rotation, mi_bombo,
+      handle_inputs(game.camera->position, game.camera->rotation, mi_bombo,
                     delta);
       break;
     }
@@ -67,9 +67,6 @@ void poll_inputs(Game &game, float delta) {
       break;
     }
   }
-  fmt::print("{}\n", game.camera->positon.x);
-  fmt::print("{}\n", game.camera->positon.y);
-  fmt::print("{}\n", game.camera->positon.z);
 }
 
 void update_camera(Game &game) {
@@ -78,8 +75,8 @@ void update_camera(Game &game) {
   //   .y = game.camera->positon.y,
   //   .z = game.camera->positon.z + 1
   // };
-  game.camera->view_matrix = make_view_matrix(game.camera->positon, game.camera->target);
-  game.camera->target = {game.camera->positon.x, game.camera->positon.y, 0};
+  game.camera->view_matrix = make_view_matrix(game.camera->position, game.camera->target);
+  game.camera->target = {game.camera->position.x, game.camera->position.y, 0};
 }
 
 void update(Game &game) {
@@ -91,45 +88,39 @@ void update(Game &game) {
   update_models(game);
 }
 
+
 void draw_models(Game &game) {
-  for (EntityId ent: Query<JMesh>(game.world)) {
-    auto *mesh = game.world.get<JMesh>(ent);
-    // switch (game.render_mode) {
-    //   case 0:
-    //     draw_wire_frame(mesh->transformed_vertices, mesh->triangles, game.camera->projection_matrix,
-    //                     GREEN, false);
-    //     DrawText("wire + backface", 0, 0, 20, WHITE);
-    //     break;
-    //   case 1:
-    //     draw_wire_frame(mesh->transformed_vertices, mesh->triangles, game.camera->projection_matrix,
-    //                     GREEN, true);
-    //     DrawText("wire", 0, 0, 20, WHITE);
-    //     break;
-    //   case 2:
-    //     draw_unlit(mesh->transformed_vertices, mesh->triangles, game.camera->projection_matrix,
-    //                WHITE, game.zbuffer);
-    //     DrawText("mesh, unlit", 0, 0, 20, WHITE);
-    //     break;
-    //
-    //   case 3:
-    //     draw_flat_shaded(mesh->transformed_vertices, mesh->triangles,
-    //                      game.camera->projection_matrix, *game.light, WHITE, game.zbuffer, 0.2, false);
-    //     DrawText("mesh, lit, pixel based", 0, 0, 20, WHITE);
-    //     break;
-    //
-    //   case 4:
+  vector<EntityId> entities_to_draw{};
+  JCamera *cam = game.camera;
+  // just store the ids, get the components in the comparison function
+  for (EntityId ent: Query<JMesh, JTransform>(game.world)) {
+    entities_to_draw.emplace_back(ent);
+  }
+
+  /* z depth based mesh sorting
+   * I'd need to implment some polygon cliping related algorithm that seperates overlapping parts into seperate polygons that are drawn seperatley.
+   * something like https://www.geeksforgeeks.org/dsa/polygon-clipping-sutherland-hodgman-algorithm/
+   * for now just not being able to change the y of the camera and always drawing the floor last seems like a fine solution
+   */
+  // ranges::sort(entities_to_draw, [&cam, &game](EntityId a, EntityId b) {
+  //                // sort decending, furthest elements are drawn first
+  //                auto *a_trans = game.world.get<JTransform>(a);
+  //                auto *b_trans = game.world.get<JTransform>(b);
+  //                f32 a_dist = (a_trans->translation - cam->position).length_squared();
+  //                f32 b_dist = (b_trans->translation - cam->position).length_squared();
+  //                return a_dist < b_dist;
+  //              }
+  // );
+
+  for (const EntityId id: entities_to_draw) {
+    if (game.world.has<Floor>(id)) {
+      continue;
+    }
+
+    auto *mesh = game.world.get<JMesh>(id);
     draw_flat_shaded(mesh->transformed_vertices, mesh->triangles,
                      game.camera->projection_matrix, *game.light, mesh->color, 0.2, true);
     DrawText("mesh, lit, triangle based", 0, 10, 10, WHITE);
-    //DrawText(, 0, 10, 10, WHITE);
-    //   break;
-
-    // case 5:
-    //   draw_texture_flat_shaded(mesh.transformed_vertices, mesh.triangles, mesh.uvs,
-    //                            projectionMatrix, *light, texture, game.zbuffer);
-    //   DrawText("textured + lit", 0, 0, 20, WHITE);
-    //   break;
-    //default: ;
   }
 };
 
@@ -151,6 +142,7 @@ int main() {
   EntityId light_id = game.world.new_entity();
   EntityId floor = game.world.new_entity();
   auto *floor_mesh = game.world.assign<JMesh>(floor);
+  game.world.assign<Floor>(floor);
   auto *floor_trans = game.world.assign<JTransform>(floor);
   *floor_mesh = make_rectangle(10, .5, 10);
   auto *light = game.world.assign<Light>(camera_id);

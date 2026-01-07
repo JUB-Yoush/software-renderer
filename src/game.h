@@ -5,6 +5,9 @@
 struct Player {
 };
 
+struct Floor {
+};
+
 struct PlayerRef {
     JTransform *transform;
     JMesh *mesh;

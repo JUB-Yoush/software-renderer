@@ -48,6 +48,14 @@ struct Vec3 {
     };
   }
 
+  f32 length() const {
+    return sqrtf(x * x + y * y + z * z);
+  }
+
+  f32 length_squared() const {
+    return (x * x + y * y + z * z);
+  }
+
   Vec3 cross(Vec3 v2) {
     return Vec3{
       y * v2.z - z * v2.y,

@@ -4,7 +4,7 @@
 #include "../math/matrix.h"
 
 struct JCamera {
-  Vec3 positon;
+  Vec3 position;
   Vec3 rotation;
   Vec3 target;
   Matrix4x4 projection_matrix;
@@ -13,7 +13,7 @@ struct JCamera {
 
 JCamera make_camera(Vec3 positon, Vec3 target) {
   JCamera cam;
-  cam.positon = positon;
+  cam.position = positon;
   cam.target = target;
   cam.projection_matrix = make_projection_matrix(
     FOV, SCREEN_HEIGHT, SCREEN_WIDTH, NEAR_PLANE, FAR_PLANE);
@@ -22,7 +22,7 @@ JCamera make_camera(Vec3 positon, Vec3 target) {
 }
 
 void setup_camera(JCamera *cam, Vec3 positon, Vec3 target) {
-  cam->positon = positon;
+  cam->position = positon;
   cam->target = target;
   cam->projection_matrix = make_projection_matrix(
     FOV, SCREEN_HEIGHT, SCREEN_WIDTH, NEAR_PLANE, FAR_PLANE);
