@@ -10,6 +10,8 @@
 #include <vector>
 #include <fmt/xchar.h>
 
+#include "physics/collision.h"
+
 // typedef Vec3 Translation;
 // typedef Vec3 Rotation;
 
@@ -70,7 +72,7 @@ vector<Vec3> sorted_z_order(vector<Vec3> vec) {
   return vec;
 }
 
-JMesh make_rectangle(f32 x_len, f32 y_len, f32 z_len) {
+JMesh make_rectangle_mesh(f32 x_len, f32 y_len, f32 z_len) {
   const f32 x = x_len / 2;
   const f32 y = y_len / 2;
   const f32 z = z_len / 2;
@@ -139,7 +141,12 @@ JMesh make_rectangle(f32 x_len, f32 y_len, f32 z_len) {
 }
 
 inline JMesh make_cube() {
-  return make_rectangle(0, 0, 0);
+  return make_rectangle_mesh(1, 1, 1);
+}
+
+inline JMesh make_aabb_mesh(AABB aabb) {
+  auto [x, y, z] = aabb.get_lengths();
+  return make_rectangle_mesh(x, y, z);
 }
 
 Triangle make_triangle_from_obj_points(f32 points[10]) {

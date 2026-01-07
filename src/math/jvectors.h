@@ -24,6 +24,12 @@ struct Vec2 {
   explicit operator Vector2() const {
     return Vector2{x, y};
   }
+
+  const char *to_string() const {
+    char buffer[50]; // Adjust the size as needed
+    std::snprintf(buffer, sizeof(buffer), "Vec2(%f, %f)", x, y);
+    return std::string(buffer).c_str();
+  }
 };
 
 struct Vec3 {
@@ -70,6 +76,12 @@ struct Vec3 {
   }
 
   f32 dot(Vec3 v2) { return x * v2.x + y * v2.y + z * v2.z; }
+
+  const char *to_string() const {
+    char buffer[50]; // Adjust the size as needed
+    std::snprintf(buffer, sizeof(buffer), "Vec2(%f, %f, %f)", x, y, z);
+    return std::string(buffer).c_str();
+  }
 };
 
 struct Vec4 {

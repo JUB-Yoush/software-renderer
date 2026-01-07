@@ -5,12 +5,15 @@
 struct Player {
 };
 
+typedef Vec3 Velocity;
+
 struct Floor {
 };
 
 struct PlayerRef {
     JTransform *transform;
     JMesh *mesh;
+    Velocity *velocity;
 };
 
 struct Game {

@@ -38,8 +38,7 @@ struct World {
         return entities.back().id;
     }
 
-
-    // TODO assign multiple components in one line, have a
+    // TODO assign multiple components in one line, use a templated tuple or something???
     template<typename T>
     T *assign(EntityId id) {
         assert(entities[get_entity_index(id)].id == id && "invalid entity id");

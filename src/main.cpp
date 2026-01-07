@@ -11,6 +11,7 @@
 #include <iostream>
 #include "game.h"
 #include "jinput.h"
+#include "physics/collision.h"
 
 // #define SCREEN_WIDTH (800)
 // #define SCREEN_HEIGHT (600)
@@ -19,11 +20,13 @@
 
 void update_models(Game &game) {
   const f32 delta = GetFrameTime();
-  for (EntityId ent: Query<JMesh, JTransform>(game.world)) {
+  for (EntityId ent: Query<JMesh, JTransform, AABB>(game.world)) {
     auto &translation = game.world.get<JTransform>(ent)->translation;
     auto &rotation = game.world.get<JTransform>(ent)->rotation;
     auto &scale = game.world.get<JTransform>(ent)->scale;
     auto *mesh = game.world.get<JMesh>(ent);
+    auto *aabb = game.world.get<AABB>(ent);
+
 
     Matrix4x4 translation_matrix =
         make_translation_matrix(translation.x, translation.y, translation.z);
@@ -61,12 +64,24 @@ void poll_inputs(Game &game, float delta) {
     }
 
     case Game::PLAYER: {
-      handle_inputs(game.playerref.transform->translation, game.playerref.transform->rotation,
-                    game.playerref.transform->scale,
-                    delta);
+      f32 speed = .5;
+
+      Vec3 &translation = game.playerref.transform->translation;
+      if (IsKeyDown(KEY_W))
+        translation.z += speed;
+      if (IsKeyDown(KEY_S))
+        translation.z -= speed;
+      if (IsKeyDown(KEY_A))
+        translation.x += speed;
+      if (IsKeyDown(KEY_D))
+        translation.x -= speed;
+
       break;
     }
   }
+}
+
+void update_gravity(Game &game) {
 }
 
 void update_camera(Game &game) {
@@ -84,6 +99,7 @@ void update(Game &game) {
   update_render_mode(game.render_mode, 5);
   update_control_mode(game);
   poll_inputs(game, delta);
+  update_gravity(game);
   update_camera(game);
   update_models(game);
 }
@@ -125,17 +141,21 @@ void draw_models(Game &game) {
       continue;
     }
 
+    // if (game.world.has<Player>(id)) {
+    //   DrawText(game.world.get<JTransform>(id)->translation.to_string(), 0, 30, 10, WHITE);
+    // }
+
     auto *mesh = game.world.get<JMesh>(id);
     draw_flat_shaded(mesh->transformed_vertices, mesh->triangles,
                      game.camera->projection_matrix, *game.light, mesh->color, 0.2, true);
-    DrawText("mesh, lit, triangle based", 0, 10, 10, WHITE);
+    DrawText("mesh, lit, triangle based", 0, 10, 20, WHITE);
   }
 };
 
 void draw(Game &game) {
   BeginDrawing();
   ClearBackground(BLACK);
-  DrawFPS(0, 20);
+  DrawFPS(0, 0);
   draw_floor(game);
   draw_models(game);
   EndDrawing();
@@ -153,7 +173,7 @@ int main() {
   auto *floor_mesh = game.world.assign<JMesh>(floor);
   game.world.assign<Floor>(floor);
   auto *floor_trans = game.world.assign<JTransform>(floor);
-  *floor_mesh = make_rectangle(10, .5, 10);
+  auto *floor_aabb = game.world.assign<AABB>(floor);
   auto *light = game.world.assign<Light>(camera_id);
   auto *cam = game.world.assign<JCamera>(camera_id);
   game.camera = cam;
@@ -161,18 +181,27 @@ int main() {
 
   setup_camera(game.camera, {0, -2, 8}, {0, 0, 1});
   setup_light(game.light, {0, -1, 0}, 1);
+  *floor_aabb = AABB::make(10, .5, 10);
+  *floor_mesh = make_aabb_mesh(*floor_aabb);
 
   // setup player
   EntityId player_id = game.world.new_entity();
   auto *player = game.world.assign<Player>(player_id);
   auto *pmesh = game.world.assign<JMesh>(player_id);
   auto *ptransform = game.world.assign<JTransform>(player_id);
+  auto *player_aabb = game.world.assign<AABB>(player_id);
+  auto *player_vel = game.world.assign<Velocity>(player_id);
 
-  *pmesh = make_rectangle(1, 1, 1);
+  // TODO why is everything upside down
+  ptransform->translation.y += -3;
+
+  *pmesh = make_rectangle_mesh(1, 1, 1);
+  *player_aabb = AABB::make(1, 1, 1);
+
   pmesh->color = RED;
-
   game.playerref.transform = ptransform;
   game.playerref.mesh = pmesh;
+  game.playerref.velocity = player_vel;
 
   while (!WindowShouldClose()) {
     const f32 delta = GetFrameTime();
