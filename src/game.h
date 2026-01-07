@@ -27,7 +27,7 @@ struct Game {
     };
 
     u8 render_mode = 4;
-    ControlMode control_mode = CAMERA;
+    ControlMode control_mode = PLAYER;
     World world;
     JCamera *camera{};
     Light *light;

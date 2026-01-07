@@ -38,12 +38,8 @@ struct World {
         return entities.back().id;
     }
 
-    // template<typename T>
-    // void assign(EntityId id) {
-    //     i32 componentId = get_id<T>();
-    //     entities[id].mask.set(componentId);
-    // }
 
+    // TODO assign multiple components in one line, have a
     template<typename T>
     T *assign(EntityId id) {
         assert(entities[get_entity_index(id)].id == id && "invalid entity id");
@@ -68,9 +64,6 @@ struct World {
     T *get(EntityId id) {
         assert(entities[get_entity_index(id)].id == id && "invalid entity id");
         i8 component_id = get_id<T>();
-        // if (!entities[get_entity_index(id)].bitmask.test(component_id)) {
-        //     return nullptr;
-        // }
         assert(
             entities[get_entity_index(id)].bitmask.test(component_id) &&
             "entity didn't have component you tried to reference");

@@ -89,6 +89,14 @@ void update(Game &game) {
 }
 
 
+void draw_floor(Game &game) {
+  for (EntityId ent: Query<Floor>(game.world)) {
+    auto *mesh = game.world.get<JMesh>(ent);
+    draw_flat_shaded(mesh->transformed_vertices, mesh->triangles,
+                     game.camera->projection_matrix, *game.light, mesh->color, 0.2, true);
+  }
+}
+
 void draw_models(Game &game) {
   vector<EntityId> entities_to_draw{};
   JCamera *cam = game.camera;
@@ -128,6 +136,7 @@ void draw(Game &game) {
   BeginDrawing();
   ClearBackground(BLACK);
   DrawFPS(0, 20);
+  draw_floor(game);
   draw_models(game);
   EndDrawing();
 }
