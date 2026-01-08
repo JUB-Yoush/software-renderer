@@ -1,5 +1,5 @@
 #include "renderer/jcamera.h"
-#include "renderer/jdraw.h"
+#include "renderer/renderer.h"
 #include "renderer/mesh.h"
 #include "jinput.h"
 #include "math/calc.h"
@@ -64,25 +64,55 @@ void poll_inputs(Game &game, float delta) {
     }
 
     case Game::PLAYER: {
-      f32 speed = .5;
-
-      Vec3 &translation = game.playerref.transform->translation;
+      game.input_dir = Vec2::zero();
       if (IsKeyDown(KEY_W))
-        translation.z += speed;
+        game.input_dir.y = -1;
       if (IsKeyDown(KEY_S))
-        translation.z -= speed;
+        game.input_dir.y = 1;
       if (IsKeyDown(KEY_A))
-        translation.x += speed;
+        game.input_dir.x = -1;
       if (IsKeyDown(KEY_D))
-        translation.x -= speed;
-
+        game.input_dir.x = 1;
+      game.input_dir = game.input_dir.normalized();
       break;
     }
   }
 }
 
-void update_gravity(Game &game) {
+bool player_touching_ground(Game &game) {
+  // use it's aabb to check if we're touching ground in x y or z
+  auto *p_aabb = game.world.get<AABB>(game.player_id);
+  const auto p_translation = game.world.get<JTransform>(game.player_id)->translation;
+  for (const EntityId ent: Query<Floor, AABB>(game.world)) {
+    const auto aabb = game.world.get<AABB>(ent);
+    const auto translation = game.world.get<JTransform>(ent)->translation;
+    AABB p_translated_box = p_aabb->translated(p_translation);
+    AABB translated_box = aabb->translated(translation);
+    if (AABB::has_intersection(p_translated_box, translated_box)) {
+      return true;
+    }
+  }
+  return false;
 }
+
+void update_player(Game &game, f32 delta) {
+  f32 speed = 5;
+  f32 gravity = .1;
+  if (game.input_dir != Vec2::zero()) {
+    *game.playerref.velocity = Velocity{
+      game.input_dir.x * speed, game.playerref.velocity->y, game.input_dir.y * speed
+    };
+  } else {
+    *game.playerref.velocity = Velocity{0, game.playerref.velocity->y, 0};
+  }
+  if (!player_touching_ground(game)) {
+    game.playerref.velocity->y += gravity;
+  } else {
+    game.playerref.velocity->y = 0;
+  }
+  game.playerref.transform->translation += *game.playerref.velocity * delta;
+}
+
 
 void update_camera(Game &game) {
   // game.camera->target = {
@@ -99,7 +129,7 @@ void update(Game &game) {
   update_render_mode(game.render_mode, 5);
   update_control_mode(game);
   poll_inputs(game, delta);
-  update_gravity(game);
+  update_player(game, delta);
   update_camera(game);
   update_models(game);
 }
@@ -186,6 +216,7 @@ int main() {
 
   // setup player
   EntityId player_id = game.world.new_entity();
+  game.player_id = player_id;
   auto *player = game.world.assign<Player>(player_id);
   auto *pmesh = game.world.assign<JMesh>(player_id);
   auto *ptransform = game.world.assign<JTransform>(player_id);

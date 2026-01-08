@@ -35,6 +35,13 @@ struct Triangle {
   }
 };
 
+enum DrawMode {
+  WIRE,
+  WIRE_CULLED,
+  FLAT,
+  SHADED,
+};
+
 struct JMesh {
   //TODO seperate immutable values to be a pointer instead of making a new copy per mesh
   vector<Vec3> transformed_vertices;
@@ -44,15 +51,6 @@ struct JMesh {
   vector<Vec2> uvs; // can be shared
   vector<Triangle> triangles; // can be shared
   Color color = WHITE;
-
-  static void clone(JMesh &clone_dest, const JMesh &clone_src) {
-    clone_dest.transformed_vertices = clone_src.transformed_vertices;
-    clone_dest.transformed_normals = clone_src.transformed_normals;
-    clone_dest.vertices = clone_src.vertices;
-    clone_dest.normals = clone_src.normals;
-    clone_dest.uvs = clone_src.uvs;
-    clone_dest.triangles = clone_src.triangles;
-  }
 };
 
 

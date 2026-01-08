@@ -18,17 +18,29 @@ struct Vec2 {
   Vec2 operator+(const Vec2 &v2) { return Vec2{x + v2.x, y + v2.y}; }
   Vec2 operator-(const Vec2 &v2) { return Vec2{x - v2.x, y - v2.y}; }
   Vec2 operator*(const Vec2 &v2) { return Vec2{x * v2.x, y * v2.y}; }
+  Vec2 operator*(const f32 &scalar) { return Vec2{x * scalar, y * scalar}; }
+  Vec2 operator*(const i32 &scalar) { return Vec2{x * scalar, y * scalar}; }
   bool operator==(const Vec2 &v2) { return x == v2.x && y == v2.y; };
   // bool operator<(const Vec2 &v2) { return x < v2.x && y < v2.y; };
   // bool operator>(const Vec2 &v2) { return x > v2.x && y > v2.y; };
-  explicit operator Vector2() const {
-    return Vector2{x, y};
+  static Vec2 zero() {
+    return {0, 0};
   }
 
-  const char *to_string() const {
-    char buffer[50]; // Adjust the size as needed
-    std::snprintf(buffer, sizeof(buffer), "Vec2(%f, %f)", x, y);
-    return std::string(buffer).c_str();
+  Vec2 normalized() {
+    f32 len = std::sqrt(x * x + y * y);
+    if (len == 0.0) {
+      return {0, 0};
+    }
+
+    return {
+      x / len,
+      y / len,
+    };
+  }
+
+  explicit operator Vector2() const {
+    return Vector2{x, y};
   }
 };
 
@@ -38,8 +50,25 @@ struct Vec3 {
   f32 z;
 
   Vec3 operator+(const Vec3 &v2) { return Vec3{x + v2.x, y + v2.y, z + v2.z}; }
-  Vec3 operator-(const Vec3 &v2) { return Vec3{x - v2.x, y - v2.y, z - v2.z}; }
-  Vec3 operator*(const Vec3 &v2) { return Vec3{x * v2.x, y * v2.y, z * v2.z}; }
+
+  Vec3 &operator+=(const Vec3 &v2) {
+    this->x += v2.x;
+    this->y += v2.y;
+    this->z += v2.z;
+    return *this;
+  }
+
+  Vec3 operator-(const Vec3 &v2) {
+    return Vec3{x - v2.x, y - v2.y, z - v2.z};
+  }
+
+  Vec3 operator*(const Vec3 &v2) {
+    return Vec3{x * v2.x, y * v2.y, z * v2.z};
+  }
+
+  Vec3 operator*(const f32 &scalar) {
+    return Vec3{x * scalar, y * scalar, z * scalar};
+  }
 
   Vec3 normalized() {
     f32 len = std::sqrt(x * x + y * y + z * z);
@@ -75,7 +104,9 @@ struct Vec3 {
     y = floor(y);
   }
 
-  f32 dot(Vec3 v2) { return x * v2.x + y * v2.y + z * v2.z; }
+  f32 dot(Vec3 v2) {
+    return x * v2.x + y * v2.y + z * v2.z;
+  }
 
   const char *to_string() const {
     char buffer[50]; // Adjust the size as needed

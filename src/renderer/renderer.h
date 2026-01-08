@@ -3,7 +3,7 @@
 #include "mesh.h"
 #include "../jlib.h"
 #include "../math/calc.h"
-#include "../math/jvectors.h"
+#include "../math/vectors.h"
 #include "light.h"
 #include "raylib.h"
 #include "../math/sort.h"

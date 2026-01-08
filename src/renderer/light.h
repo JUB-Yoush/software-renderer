@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../math/jvectors.h"
+#include "../math/vectors.h"
 
 struct Light {
     Vec3 direction;

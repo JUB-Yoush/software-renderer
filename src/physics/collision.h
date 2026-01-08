@@ -1,6 +1,6 @@
 #pragma once
 #include "../jlib.h"
-#include "../math/jvectors.h"
+#include "../math/vectors.h"
 
 struct AABB {
     f32 min_x;
@@ -10,7 +10,7 @@ struct AABB {
     f32 min_z;
     f32 max_z;
 
-    static bool intersects(const AABB a, const AABB b) {
+    static bool has_intersection(const AABB &a, const AABB &b) {
         return (
             a.min_x <= b.max_x &&
             a.max_x >= b.min_x &&
@@ -42,7 +42,7 @@ struct AABB {
     }
 
     Vec3 get_lengths() {
-        return {max_x + min_x, max_y + min_y, max_z + min_z};
+        return {max_x - min_x, max_y - min_y, max_z - min_z};
     }
 
     AABB translated(const Vec3 &translation) const {

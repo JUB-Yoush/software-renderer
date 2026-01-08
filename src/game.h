@@ -35,4 +35,6 @@ struct Game {
     JCamera *camera{};
     Light *light;
     PlayerRef playerref;
+    Vec2 input_dir{};
+    EntityId player_id;
 };

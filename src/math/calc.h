@@ -1,7 +1,7 @@
 #pragma once
 #include "../consts.h"
 #include "../jlib.h"
-#include "jvectors.h"
+#include "vectors.h"
 #include <cmath>
 #include <iostream>
 #include <math.h>

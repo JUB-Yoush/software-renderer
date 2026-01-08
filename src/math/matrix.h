@@ -1,6 +1,6 @@
 #pragma once
 #include "../jlib.h"
-#include "../math/jvectors.h"
+#include "../math/vectors.h"
 
 struct Matrix4x4 {
   f32 mat[4][4];
