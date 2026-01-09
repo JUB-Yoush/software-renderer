@@ -98,6 +98,7 @@ bool player_touching_ground(Game &game) {
 void update_player(Game &game, f32 delta) {
   f32 speed = 5;
   f32 gravity = .1;
+  bool is_on_floor = player_touching_ground(game);
   if (game.input_dir != Vec2::zero()) {
     *game.playerref.velocity = Velocity{
       game.input_dir.x * speed, game.playerref.velocity->y, game.input_dir.y * speed
@@ -105,10 +106,13 @@ void update_player(Game &game, f32 delta) {
   } else {
     *game.playerref.velocity = Velocity{0, game.playerref.velocity->y, 0};
   }
-  if (!player_touching_ground(game)) {
+  if (!is_on_floor) {
     game.playerref.velocity->y += gravity;
   } else {
     game.playerref.velocity->y = 0;
+  }
+  if (IsKeyPressed(KEY_RIGHT_CONTROL) && is_on_floor) {
+    game.playerref.velocity->y -= speed;
   }
   game.playerref.transform->translation += *game.playerref.velocity * delta;
 }
@@ -156,15 +160,15 @@ void draw_models(Game &game) {
    * something like https://www.geeksforgeeks.org/dsa/polygon-clipping-sutherland-hodgman-algorithm/
    * for now just not being able to change the y of the camera and always drawing the floor last seems like a fine solution
    */
-  // ranges::sort(entities_to_draw, [&cam, &game](EntityId a, EntityId b) {
-  //                // sort decending, furthest elements are drawn first
-  //                auto *a_trans = game.world.get<JTransform>(a);
-  //                auto *b_trans = game.world.get<JTransform>(b);
-  //                f32 a_dist = (a_trans->translation - cam->position).length_squared();
-  //                f32 b_dist = (b_trans->translation - cam->position).length_squared();
-  //                return a_dist < b_dist;
-  //              }
-  // );
+  ranges::sort(entities_to_draw, [&cam, &game](EntityId a, EntityId b) {
+                 // sort decending, furthest elements are drawn first
+                 auto *a_trans = game.world.get<JTransform>(a);
+                 auto *b_trans = game.world.get<JTransform>(b);
+                 f32 a_dist = (a_trans->translation - cam->position).length_squared();
+                 f32 b_dist = (b_trans->translation - cam->position).length_squared();
+                 return a_dist < b_dist;
+               }
+  );
 
   for (const EntityId id: entities_to_draw) {
     if (game.world.has<Floor>(id)) {
