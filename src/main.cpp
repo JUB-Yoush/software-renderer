@@ -1,4 +1,4 @@
-#include "renderer/jcamera.h"
+#include "renderer/camera.h"
 #include "renderer/renderer.h"
 #include "renderer/mesh.h"
 #include "jinput.h"
@@ -26,7 +26,6 @@ void update_models(Game &game) {
     auto &scale = game.world.get<JTransform>(ent)->scale;
     auto *mesh = game.world.get<JMesh>(ent);
     auto *aabb = game.world.get<AABB>(ent);
-
 
     Matrix4x4 translation_matrix =
         make_translation_matrix(translation.x, translation.y, translation.z);
@@ -201,42 +200,12 @@ int main() {
 
 
   Game game;
-  EntityId camera_id = game.world.new_entity();
-  EntityId light_id = game.world.new_entity();
-  EntityId floor = game.world.new_entity();
-  auto *floor_mesh = game.world.assign<JMesh>(floor);
-  game.world.assign<Floor>(floor);
-  auto *floor_trans = game.world.assign<JTransform>(floor);
-  auto *floor_aabb = game.world.assign<AABB>(floor);
-  auto *light = game.world.assign<Light>(camera_id);
-  auto *cam = game.world.assign<JCamera>(camera_id);
-  game.camera = cam;
-  game.light = light;
-
-  setup_camera(game.camera, {0, -2, 8}, {0, 0, 1});
-  setup_light(game.light, {0, -1, 0}, 1);
-  *floor_aabb = AABB::make(10, .5, 10);
-  *floor_mesh = make_aabb_mesh(*floor_aabb);
+  JCamera::make_camera(game, {0, -2, 8}, {0, 0, 1});
+  Light::make_light(game, {0, -1, 0}, 1);
 
   // setup player
-  EntityId player_id = game.world.new_entity();
-  game.player_id = player_id;
-  auto *player = game.world.assign<Player>(player_id);
-  auto *pmesh = game.world.assign<JMesh>(player_id);
-  auto *ptransform = game.world.assign<JTransform>(player_id);
-  auto *player_aabb = game.world.assign<AABB>(player_id);
-  auto *player_vel = game.world.assign<Velocity>(player_id);
-
-  // TODO why is everything upside down
-  ptransform->translation.y += -3;
-
-  *pmesh = make_rectangle_mesh(1, 1, 1);
-  *player_aabb = AABB::make(1, 1, 1);
-
-  pmesh->color = RED;
-  game.playerref.transform = ptransform;
-  game.playerref.mesh = pmesh;
-  game.playerref.velocity = player_vel;
+  make_player(game);
+  make_floor(game);
 
   while (!WindowShouldClose()) {
     const f32 delta = GetFrameTime();
