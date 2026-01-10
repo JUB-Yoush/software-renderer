@@ -1,4 +1,5 @@
 #include "camera.h"
+#include "game/game.h"
 
 void JCamera::make_camera(Game &game, Vec3 positon, Vec3 target) {
     EntityId camera_id = game.world.new_entity();

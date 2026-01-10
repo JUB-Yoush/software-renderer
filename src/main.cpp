@@ -1,7 +1,7 @@
 #include "renderer/camera.h"
 #include "renderer/renderer.h"
 #include "renderer/mesh.h"
-#include "jinput.h"
+#include "helper/jinput.h"
 #include "math/calc.h"
 #include "raylib.h"
 #include "renderer/texture.h"
@@ -9,8 +9,9 @@
 #include "ecs/query.h"
 #include "ecs/world.h"
 #include <iostream>
-#include "game.h"
-#include "jinput.h"
+#include "game/game.h"
+#include "game/player.h"
+#include "helper/jinput.h"
 #include "physics/collision.h"
 
 // #define SCREEN_WIDTH (800)
@@ -204,8 +205,8 @@ int main() {
   Light::make_light(game, {0, -1, 0}, 1);
 
   // setup player
-  make_player(game);
-  make_floor(game);
+  Player::make_player(game);
+  Game::make_floor(game, {10, .5, 10});
 
   while (!WindowShouldClose()) {
     const f32 delta = GetFrameTime();

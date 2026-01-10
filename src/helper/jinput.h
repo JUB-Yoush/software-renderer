@@ -1,7 +1,7 @@
 #pragma once
-#include "game.h"
+#include "../game/game.h"
 #include "jlib.h"
-#include "math/calc.h"
+#include "../math/calc.h"
 #include "raylib.h"
 
 void handle_player_inputs(Vec3 &translation, Vec3 &rotation, f32 &scale,

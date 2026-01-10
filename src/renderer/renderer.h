@@ -1,7 +1,7 @@
 #pragma once
-#include "../consts.h"
+#include "../helper/consts.h"
 #include "mesh.h"
-#include "../jlib.h"
+#include "../helper/jlib.h"
 #include "../math/calc.h"
 #include "../math/vectors.h"
 #include "light.h"
