@@ -26,7 +26,6 @@ void update_models(Game &game) {
     auto &rotation = game.world.get<JTransform>(ent)->rotation;
     auto &scale = game.world.get<JTransform>(ent)->scale;
     auto *mesh = game.world.get<JMesh>(ent);
-    auto *aabb = game.world.get<AABB>(ent);
 
     Matrix4x4 translation_matrix =
         make_translation_matrix(translation.x, translation.y, translation.z);
