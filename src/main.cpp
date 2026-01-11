@@ -113,7 +113,7 @@ void update_player(Game &game, f32 delta) {
   if (IsKeyPressed(KEY_RIGHT_CONTROL) && is_on_floor) {
     game.playerref.velocity->y -= speed;
   }
-  game.playerref.transform->translation += *game.playerref.velocity * delta;
+  //game.playerref.transform->translation += *game.playerref.velocity * delta;
 }
 
 
@@ -138,6 +138,8 @@ void spawn_mob(Game &game) {
   *mesh = make_aabb_mesh(*aabb);
   transform->translation = {Calc::rand_float(-5, 5), 0, Calc::rand_float(-5, 5)};
   mesh->color = RED;
+  transform->translation = {Calc::rand_float(-5, 5), 0, Calc::rand_float(-5, 5)};
+  *velocity = {Calc::rand_float(-5, 5), 0, Calc::rand_float(-5, 5)};
 }
 
 void update_timer(Game &game, const f32 delta) {
@@ -148,12 +150,21 @@ void update_timer(Game &game, const f32 delta) {
   }
 }
 
+void move_things(Game &game, f32 delta) {
+  for (const EntityId ent: Query<Velocity, JTransform>(game.world)) {
+    auto *transform = game.world.get<JTransform>(ent);
+    auto *velocity = game.world.get<Velocity>(ent);
+    transform->translation += *velocity * delta;
+  }
+}
+
 void update(Game &game) {
   const f32 delta = GetFrameTime();
   update_render_mode(game.render_mode, 5);
   update_control_mode(game);
   poll_inputs(game, delta);
   update_player(game, delta);
+  move_things(game, delta);
   update_camera(game);
   update_models(game);
   update_timer(game, delta);
