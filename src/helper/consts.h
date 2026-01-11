@@ -1,5 +1,5 @@
 #pragma once
-#include "jlib.h"
+#include "jtypes.h"
 
 const f32 DEG_TO_RAD = 0.01745329251;
 const i32 SCREEN_WIDTH = 800;

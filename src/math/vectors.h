@@ -1,6 +1,6 @@
 #pragma once
 #include "../helper/consts.h"
-#include "../helper/jlib.h"
+#include "../helper/jtypes.h"
 #include <cmath>
 #include <iostream>
 #include <math.h>

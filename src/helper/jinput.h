@@ -1,6 +1,6 @@
 #pragma once
 #include "../game/game.h"
-#include "jlib.h"
+#include "jtypes.h"
 #include "../math/calc.h"
 #include "raylib.h"
 

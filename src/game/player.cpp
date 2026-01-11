@@ -15,7 +15,7 @@ void Player::make_player(Game &game) {
     *pmesh = make_rectangle_mesh(1, 1, 1);
     *player_aabb = AABB::make(1, 1, 1);
 
-    pmesh->color = RED;
+    pmesh->color = GREEN;
     game.playerref.transform = ptransform;
     game.playerref.mesh = pmesh;
     game.playerref.velocity = player_vel;

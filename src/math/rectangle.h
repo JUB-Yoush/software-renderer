@@ -1,6 +1,6 @@
 #pragma once
 #include "jvectors.h"
-#include "helper/jlib.h"
+#include "helper/jtypes.h"
 
 struct Rect {
     f32 min_x;

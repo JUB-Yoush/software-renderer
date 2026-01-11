@@ -1,5 +1,5 @@
 #pragma once
-#include "../helper/jlib.h"
+#include "../helper/jtypes.h"
 
 extern i32 s_component_counter;
 

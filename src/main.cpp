@@ -127,6 +127,27 @@ void update_camera(Game &game) {
   game.camera->target = {game.camera->position.x, game.camera->position.y, 0};
 }
 
+void spawn_mob(Game &game) {
+  EntityId mob_id = game.world.new_entity();
+  game.world.assign<Mob>(mob_id);
+  auto *mesh = game.world.assign<JMesh>(mob_id);
+  auto *aabb = game.world.assign<AABB>(mob_id);
+  auto *transform = game.world.assign<JTransform>(mob_id);
+  auto *velocity = game.world.assign<Velocity>(mob_id);
+  *aabb = AABB::make(.7, .5, .7);
+  *mesh = make_aabb_mesh(*aabb);
+  transform->translation = {Calc::rand_float(-5, 5), 0, Calc::rand_float(-5, 5)};
+  mesh->color = RED;
+}
+
+void update_timer(Game &game, const f32 delta) {
+  game.mob_spawn_timer = ranges::max(game.mob_spawn_timer - delta, 0.0f);
+  if (game.mob_spawn_timer == 0) {
+    game.mob_spawn_timer = MOB_SPAWN_TIME;
+    spawn_mob(game);
+  }
+}
+
 void update(Game &game) {
   const f32 delta = GetFrameTime();
   update_render_mode(game.render_mode, 5);
@@ -135,6 +156,7 @@ void update(Game &game) {
   update_player(game, delta);
   update_camera(game);
   update_models(game);
+  update_timer(game, delta);
 }
 
 
@@ -151,6 +173,9 @@ void draw_models(Game &game) {
   JCamera *cam = game.camera;
   // just store the ids, get the components in the comparison function
   for (EntityId ent: Query<JMesh, JTransform>(game.world)) {
+    if (game.world.has<Floor>(ent)) {
+      continue;
+    }
     entities_to_draw.emplace_back(ent);
   }
 
@@ -165,7 +190,7 @@ void draw_models(Game &game) {
                  auto *b_trans = game.world.get<JTransform>(b);
                  f32 a_dist = (a_trans->translation - cam->position).length_squared();
                  f32 b_dist = (b_trans->translation - cam->position).length_squared();
-                 return a_dist < b_dist;
+                 return a_dist > b_dist;
                }
   );
 

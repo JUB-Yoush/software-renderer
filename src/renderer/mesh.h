@@ -1,5 +1,5 @@
 #pragma once
-#include "../helper/jlib.h"
+#include "../helper/jtypes.h"
 #include "physics/collision.h"
 
 struct Triangle {

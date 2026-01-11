@@ -15,6 +15,8 @@ struct Floor {
 
 struct Game; // guh?
 
+constexpr f32 MOB_SPAWN_TIME = 1.0;
+
 struct Game {
   enum RenderMode {
     WIREFRAME,
@@ -39,6 +41,7 @@ struct Game {
   PlayerRef playerref;
   Vec2 input_dir{};
   EntityId player_id;
+  f32 mob_spawn_timer = MOB_SPAWN_TIME;
 
   static void make_floor(Game &game, Vec3 floor_dimensions);
 };

@@ -1,6 +1,6 @@
 #include "calc.h"
 
-Vec3 barycentric_weights(Vec2 a, Vec2 b, Vec2 c, Vec2 p) {
+Vec3 Calc::barycentric_weights(Vec2 a, Vec2 b, Vec2 c, Vec2 p) {
     // get vectors between verts, as well as vec to point
     Vec2 ac = c - a;
     Vec2 ab = b - a;
@@ -15,3 +15,10 @@ Vec3 barycentric_weights(Vec2 a, Vec2 b, Vec2 c, Vec2 p) {
     f32 gamma = 1.0 - alpha - beta;
     return {alpha, beta, gamma};
 }
+
+// from https://stackoverflow.com/a/686373
+f32 Calc::rand_float(const f32 min, const f32 max) {
+    return min + static_cast<f32>(rand()) / (static_cast<f32>(RAND_MAX / (max - min)));
+}
+
+

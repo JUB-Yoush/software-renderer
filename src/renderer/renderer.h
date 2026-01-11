@@ -1,7 +1,7 @@
 #pragma once
 #include "../helper/consts.h"
 #include "mesh.h"
-#include "../helper/jlib.h"
+#include "../helper/jtypes.h"
 #include "../math/calc.h"
 #include "../math/vectors.h"
 #include "light.h"
@@ -132,7 +132,7 @@ void j_draw_pixel(f32 x, f32 y, Vec3 p1, Vec3 p2, Vec3 p3, Color color,
 
   Vec2 p = {x, y};
   Vec3 weights =
-      barycentric_weights({p1.x, p1.y}, {p2.x, p2.y}, {p3.x, p3.y}, p);
+      Calc::barycentric_weights({p1.x, p1.y}, {p2.x, p2.y}, {p3.x, p3.y}, p);
   f32 alpha = weights.x;
   f32 beta = weights.y;
   f32 gamma = weights.z;
@@ -280,7 +280,7 @@ void draw_texel_flat_shaded(f32 x, f32 y, Vec3 p1, Vec3 p2, Vec3 p3, Vec2 uv1,
 
   Vec2 p = {x, y};
   Vec3 weights =
-      barycentric_weights({p1.x, p1.y}, {p2.x, p2.y}, {p3.x, p3.y}, p);
+      Calc::barycentric_weights({p1.x, p1.y}, {p2.x, p2.y}, {p3.x, p3.y}, p);
   f32 alpha = weights.x;
   f32 beta = weights.y;
   f32 gamma = weights.z;
