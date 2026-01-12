@@ -41,6 +41,7 @@ struct Game {
   PlayerRef playerref;
   Vec2 input_dir{};
   EntityId player_id;
+  EntityId floor_id;
   f32 mob_spawn_timer = MOB_SPAWN_TIME;
 
   static void make_floor(Game &game, Vec3 floor_dimensions);

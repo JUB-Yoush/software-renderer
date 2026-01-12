@@ -9,6 +9,8 @@
 #include "ecs/query.h"
 #include "ecs/world.h"
 #include <iostream>
+#include <optional>
+
 #include "game/game.h"
 #include "game/player.h"
 #include "helper/jinput.h"
@@ -150,13 +152,84 @@ void update_timer(Game &game, const f32 delta) {
   }
 }
 
+//returns the values of the velocity that weren't stopped by collision
+Vec3 test_collision(Game &game, EntityId moving, EntityId other, f32 delta) {
+  auto *transform = game.world.get<JTransform>(moving);
+  auto *velocity = game.world.get<Velocity>(moving);
+  auto *aabb = game.world.get<AABB>(moving);
+
+  auto *other_transform = game.world.get<JTransform>(other);
+  auto *other_aabb = game.world.get<AABB>(other);
+
+  Vec3 out = *velocity;
+
+  // if we're already colliding
+  if (AABB::has_intersection(other_aabb->translated(other_transform->translation),
+                             aabb->translated(transform->translation))) {
+    return Vec3{};
+  }
+
+  // test x
+  transform->translation.x += velocity->x * delta;
+  if (AABB::has_intersection(other_aabb->translated(other_transform->translation),
+                             aabb->translated(transform->translation))) {
+    //modifying the transform should be a seperate step afterwards
+    out.x = 0;
+  }
+  transform->translation.x -= velocity->x * delta;
+
+  // test y
+  transform->translation.y += velocity->y * delta;
+  if (AABB::has_intersection(other_aabb->translated(other_transform->translation),
+                             aabb->translated(transform->translation))) {
+    out.y = 0;
+  }
+  transform->translation.y -= velocity->y * delta;
+
+  // test z
+  transform->translation.z += velocity->z * delta;
+  if (AABB::has_intersection(other_aabb->translated(other_transform->translation),
+                             aabb->translated(transform->translation))) {
+    out.z = 0;
+  }
+  transform->translation.z -= velocity->z * delta;
+
+  return out;
+}
+
 void move_things(Game &game, f32 delta) {
+  // things without collisions
   for (const EntityId ent: Query<Velocity, JTransform>(game.world)) {
+    if (game.world.get<AABB>(ent)) {
+      continue;
+    }
     auto *transform = game.world.get<JTransform>(ent);
     auto *velocity = game.world.get<Velocity>(ent);
     transform->translation += *velocity * delta;
   }
+
+  // player checking for floor:
+  auto *ptransform = game.world.get<JTransform>(game.player_id);
+  auto *pvelocity = game.world.get<Velocity>(game.player_id);
+  auto *paabb = game.world.get<AABB>(game.player_id);
+
+  auto *transform = game.world.get<JTransform>(game.floor_id);
+  auto *aabb = game.world.get<AABB>(game.floor_id);
+
+  Vec3 collision_result = test_collision(game, game.player_id, game.floor_id, delta);
+
+  *pvelocity = collision_result;
+
+  for (const EntityId ent: Query<Velocity, JTransform, AABB>(game.world)) {
+    auto *transform = game.world.get<JTransform>(ent);
+    auto *velocity = game.world.get<Velocity>(ent);
+    auto *aabb = game.world.get<AABB>(ent);
+
+    // test x
+    transform->translation.x += velocity->x * delta;
+  }
 }
+
 
 void update(Game &game) {
   const f32 delta = GetFrameTime();
