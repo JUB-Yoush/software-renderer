@@ -1,3 +1,5 @@
+#include <iomanip>
+
 #include "renderer/camera.h"
 #include "renderer/renderer.h"
 #include "renderer/mesh.h"
@@ -80,44 +82,6 @@ void poll_inputs(Game &game, float delta) {
   }
 }
 
-bool player_touching_ground(Game &game) {
-  // use it's aabb to check if we're touching ground in x y or z
-  auto *p_aabb = game.world.get<AABB>(game.player_id);
-  const auto p_translation = game.world.get<JTransform>(game.player_id)->translation;
-  for (const EntityId ent: Query<Floor, AABB>(game.world)) {
-    const auto aabb = game.world.get<AABB>(ent);
-    const auto translation = game.world.get<JTransform>(ent)->translation;
-    AABB p_translated_box = p_aabb->translated(p_translation);
-    AABB translated_box = aabb->translated(translation);
-    if (AABB::has_intersection(p_translated_box, translated_box)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-void update_player(Game &game, f32 delta) {
-  f32 speed = 5;
-  f32 gravity = .1;
-  bool is_on_floor = player_touching_ground(game);
-  if (game.input_dir != Vec2::zero()) {
-    *game.playerref.velocity = Velocity{
-      game.input_dir.x * speed, game.playerref.velocity->y, game.input_dir.y * speed
-    };
-  } else {
-    *game.playerref.velocity = Velocity{0, game.playerref.velocity->y, 0};
-  }
-  if (!is_on_floor) {
-    game.playerref.velocity->y += gravity;
-  } else {
-    game.playerref.velocity->y = 0;
-  }
-  if (IsKeyPressed(KEY_RIGHT_CONTROL) && is_on_floor) {
-    game.playerref.velocity->y -= speed;
-  }
-  //game.playerref.transform->translation += *game.playerref.velocity * delta;
-}
-
 
 void update_camera(Game &game) {
   // game.camera->target = {
@@ -152,8 +116,8 @@ void update_timer(Game &game, const f32 delta) {
   }
 }
 
-//returns the values of the velocity that weren't stopped by collision
-Vec3 test_collision(Game &game, EntityId moving, EntityId other, f32 delta) {
+//returns 3 optional values that list if a collision happened in that axis and what the current veloctiy was
+array<optional<f32>, 3> test_collision(Game &game, EntityId moving, EntityId other, f32 delta) {
   auto *transform = game.world.get<JTransform>(moving);
   auto *velocity = game.world.get<Velocity>(moving);
   auto *aabb = game.world.get<AABB>(moving);
@@ -161,20 +125,14 @@ Vec3 test_collision(Game &game, EntityId moving, EntityId other, f32 delta) {
   auto *other_transform = game.world.get<JTransform>(other);
   auto *other_aabb = game.world.get<AABB>(other);
 
-  Vec3 out = *velocity;
-
-  // if we're already colliding
-  if (AABB::has_intersection(other_aabb->translated(other_transform->translation),
-                             aabb->translated(transform->translation))) {
-    return Vec3{};
-  }
+  array<optional<f32>, 3> out = {nullopt, nullopt, nullopt};
 
   // test x
   transform->translation.x += velocity->x * delta;
   if (AABB::has_intersection(other_aabb->translated(other_transform->translation),
                              aabb->translated(transform->translation))) {
     //modifying the transform should be a seperate step afterwards
-    out.x = 0;
+    out[0] = velocity->x;
   }
   transform->translation.x -= velocity->x * delta;
 
@@ -182,7 +140,7 @@ Vec3 test_collision(Game &game, EntityId moving, EntityId other, f32 delta) {
   transform->translation.y += velocity->y * delta;
   if (AABB::has_intersection(other_aabb->translated(other_transform->translation),
                              aabb->translated(transform->translation))) {
-    out.y = 0;
+    out[1] = velocity->y;
   }
   transform->translation.y -= velocity->y * delta;
 
@@ -190,11 +148,15 @@ Vec3 test_collision(Game &game, EntityId moving, EntityId other, f32 delta) {
   transform->translation.z += velocity->z * delta;
   if (AABB::has_intersection(other_aabb->translated(other_transform->translation),
                              aabb->translated(transform->translation))) {
-    out.z = 0;
+    out[2] = velocity->z;
   }
   transform->translation.z -= velocity->z * delta;
 
   return out;
+}
+
+bool player_touching_ground(Game &game, f32 delta) {
+  return test_collision(game, game.player_id, game.floor_id, delta)[1].has_value();
 }
 
 void move_things(Game &game, f32 delta) {
@@ -215,21 +177,48 @@ void move_things(Game &game, f32 delta) {
 
   auto *transform = game.world.get<JTransform>(game.floor_id);
   auto *aabb = game.world.get<AABB>(game.floor_id);
+  array<optional<f32>, 3> collision_result = test_collision(game, game.player_id, game.floor_id, delta);
+  std::cout << std::fixed << std::setprecision(2);
+  //std::cout << collision_result[1].has_value() << std::endl;
+  std::cout << std::boolalpha << (player_touching_ground(game, delta) != 0) << std::endl;
 
-  Vec3 collision_result = test_collision(game, game.player_id, game.floor_id, delta);
+  if (collision_result[0].has_value()) {
+    pvelocity->x = 0;
+  }
+  if (collision_result[1].has_value()) {
+    pvelocity->y = 0;
+  }
+  if (collision_result[2].has_value()) {
+    pvelocity->z = 0;
+  }
 
-  *pvelocity = collision_result;
 
   for (const EntityId ent: Query<Velocity, JTransform, AABB>(game.world)) {
     auto *transform = game.world.get<JTransform>(ent);
     auto *velocity = game.world.get<Velocity>(ent);
     auto *aabb = game.world.get<AABB>(ent);
-
-    // test x
-    transform->translation.x += velocity->x * delta;
+    transform->translation += *velocity * delta;
   }
 }
 
+void update_player(Game &game, f32 delta) {
+  f32 speed = 5;
+  f32 gravity = .1;
+  bool is_on_floor = player_touching_ground(game, delta);
+  if (game.input_dir != Vec2::zero()) {
+    *game.playerref.velocity = Velocity{
+      game.input_dir.x * speed, game.playerref.velocity->y, game.input_dir.y * speed
+    };
+  } else {
+    *game.playerref.velocity = Velocity{0, game.playerref.velocity->y, 0};
+  }
+  if (!is_on_floor) {
+    game.playerref.velocity->y += gravity;
+  }
+  if (IsKeyPressed(KEY_RIGHT_CONTROL) && is_on_floor) {
+    game.playerref.velocity->y -= 20;
+  }
+}
 
 void update(Game &game) {
   const f32 delta = GetFrameTime();

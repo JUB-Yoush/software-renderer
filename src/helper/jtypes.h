@@ -34,6 +34,12 @@ namespace stdj {
 #define DEFER_3(x) DEFER_2(x, __COUNTER__)
 #define defer(code) auto DEFER_3(_defer_) = defer_func([&]() { code; })
 
+  // Source - https://stackoverflow.com/a
+  template<typename T>
+  int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+  }
+
   // template <typename T> int length_of(T x[]) { return sizeof(x) / sizeof(x[0]);
   // }
   // f64 clamp(f64 d, f64 min, f64 max) {
