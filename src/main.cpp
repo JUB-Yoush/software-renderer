@@ -167,7 +167,7 @@ bool player_touching_ground(Game &game, f32 delta) {
 void move_things(Game &game, f32 delta) {
   // things without collisions
   for (const EntityId ent: Query<Velocity, JTransform>(game.world)) {
-    if (game.world.get<AABB>(ent)) {
+    if (game.world.has<AABB>(ent)) {
       continue;
     }
     auto *transform = game.world.get<JTransform>(ent);
@@ -205,6 +205,7 @@ void move_things(Game &game, f32 delta) {
   }
 }
 
+
 void update_player(Game &game, f32 delta) {
   f32 speed = 5;
   f32 gravity = .1;
@@ -228,7 +229,16 @@ void update_player(Game &game, f32 delta) {
   if (IsKeyPressed(KEY_RIGHT_CONTROL) && is_on_floor) {
     game.playerref.velocity->y -= 5;
   }
-  is_on_floor = player_touching_ground(game, delta);
+  // check stompin
+  for (const EntityId ent: Query<Mob>(game.world)) {
+
+  auto collsions = test_collision(game, game.player_id, ent, delta);
+    // the player perpetually has a
+    if (collsions[1].second != false && collsions[1].first > 1) {
+      game.world.destroy_entity(ent);
+      game.playerref.velocity->y += -8;
+    }
+  }
 }
 
 void update(Game &game) {
