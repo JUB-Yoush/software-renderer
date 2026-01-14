@@ -84,11 +84,6 @@ void poll_inputs(Game &game, float delta) {
 
 
 void update_camera(Game &game) {
-  // game.camera->target = {
-  //   .x = game.camera->positon.x,
-  //   .y = game.camera->positon.y,
-  //   .z = game.camera->positon.z + 1
-  // };
   game.camera->view_matrix = make_view_matrix(game.camera->position, game.camera->target);
   game.camera->target = {game.camera->position.x, game.camera->position.y, 0};
 }

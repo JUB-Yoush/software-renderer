@@ -128,7 +128,7 @@ Triangle make_triangle_from_obj_points(f32 points[10]) {
 }
 
 
-JMesh load_mesh_from_file(const char *filename) {
+MeshData load_mesh_from_file(const char *filename) {
   /*
   parses out into
 
@@ -197,12 +197,21 @@ JMesh load_mesh_from_file(const char *filename) {
     }
   }
   fclose(file);
-  return JMesh{
-    .transformed_vertices = vertices,
-    .transformed_normals = normals,
+  return MeshData{
     .vertices = vertices,
     .normals = normals,
     .uvs = uvs,
     .triangles = triangles
+  };
+}
+
+JMesh make_mesh_instance(const MeshData &mesh_data) {
+  return JMesh{
+    .transformed_vertices = mesh_data.vertices,
+    .transformed_normals = mesh_data.normals,
+    .vertices = mesh_data.vertices,
+    .normals = mesh_data.normals,
+    .uvs = mesh_data.uvs,
+    .triangles = mesh_data.triangles
   };
 }

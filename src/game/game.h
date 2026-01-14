@@ -1,4 +1,7 @@
 #pragma once
+#include <stack>
+
+#include "scene.h"
 #include "../ecs/world.h"
 #include "../renderer/camera.h"
 #include "../renderer/light.h"
@@ -16,6 +19,12 @@ struct Floor {
 struct Game; // guh?
 
 constexpr f32 MOB_SPAWN_TIME = 1.0;
+
+struct App {
+  stack<Scene *> scene_stack;
+  Scene &current_scene;
+  // add like application options n here n shii
+};
 
 struct Game {
   enum RenderMode {
