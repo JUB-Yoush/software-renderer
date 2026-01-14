@@ -127,6 +127,7 @@ Triangle make_triangle_from_obj_points(f32 points[10]) {
   return tri;
 }
 
+
 JMesh load_mesh_from_file(const char *filename) {
   /*
   parses out into

@@ -16,6 +16,7 @@
 #include "raymath.h"
 #include "fmt/xchar.h"
 #include "../math/matrix.h"
+#include "game/game.h"
 using namespace std;
 
 void apply_transformations(vector<Vec3> &transformed, const vector<Vec3> &original,
@@ -200,7 +201,7 @@ void draw_filled_triangle(Vec3 &p1, Vec3 &p2, Vec3 &p3, Color color,
 }
 
 void draw_unlit(const vector<Vec3> &vertices, vector<Triangle> &triangles,
-                const Matrix4x4 &proj_mat, Color color, ZBuffer &zbuffer) {
+                const Matrix4x4 &proj_mat, Color color) {
   for (Triangle &tri: triangles) {
     Vec3 v1 = vertices[tri[0]];
     Vec3 v2 = vertices[tri[1]];
@@ -218,13 +219,14 @@ void draw_unlit(const vector<Vec3> &vertices, vector<Triangle> &triangles,
       continue;
     }
     //DrawTriangle(Vector2{p1.x, p1.y}, Vector2{p2.x, p2.y},Vector2{p3.x, p3.y}, WHITE);
-    draw_filled_triangle(p1, p2, p3, color, zbuffer);
+    //draw_filled_triangle(p1, p2, p3, color, zbuffer);
+    DrawTriangle({p3.x, p3.y}, {p2.x, p2.y}, {p1.x, p1.y}, color);
   }
 }
 
 void draw_flat_shaded(const vector<Vec3> &vertices, vector<Triangle> &triangles,
                       Matrix4x4 proj_mat, Light light, Color color,
-                      f32 ambient = 0.2, bool render_trianges = false) {
+                      f32 ambient = 0.2) {
   for (Triangle &tri: triangles) {
     Vec3 v1 = vertices[tri[0]];
     Vec3 v2 = vertices[tri[1]];
@@ -252,19 +254,7 @@ void draw_flat_shaded(const vector<Vec3> &vertices, vector<Triangle> &triangles,
       static_cast<u8>(color.g * intesnity),
       static_cast<u8>(color.b * intesnity), color.a
     };
-    if (render_trianges) {
-      //sort_points(p1, p2, p3);
-
-      // p1.floor_xy();
-      // p2.floor_xy();
-      // p3.floor_xy();
-
-      // vector<Vec2> vecs = ccw_order({p1.x, p1.y}, {p2.x, p2.y}, {p3.x, p3.y});
-      // DrawTriangle(Vector2(vecs[2]), Vector2(vecs[1]), Vector2(vecs[0]), shadedColor);
-      DrawTriangle({p3.x, p3.y}, {p2.x, p2.y}, {p1.x, p1.y}, shadedColor);
-    } else {
-      //draw_filled_triangle(p1, p2, p3, shadedColor, zbuffer);
-    }
+    DrawTriangle({p3.x, p3.y}, {p2.x, p2.y}, {p1.x, p1.y}, shadedColor);
   }
 }
 
@@ -429,5 +419,29 @@ void draw_texture_unlit(vector<Vec3> &vertices, vector<Triangle> &triangles,
     draw_textured_triangle_flat_shaded(p1, p2, p3, uv1, uv2, uv3, texture,
                                        1.0, // Unlit
                                        zbuffer);
+  }
+}
+
+void draw_mesh(JMesh &mesh, Matrix4x4 &proj_matrix, Light &light) {
+  switch (auto draw_mode = mesh.draw_mode) {
+    case WIRE: {
+      draw_wire_frame(mesh.transformed_vertices, mesh.triangles, proj_matrix,
+                      mesh.color, false);
+    }
+    break;
+    case WIRE_CULLED: {
+      draw_wire_frame(mesh.transformed_vertices, mesh.triangles, proj_matrix,
+                      mesh.color, true);
+    }
+    case FLAT: {
+      draw_unlit(mesh.transformed_vertices, mesh.triangles, proj_matrix,
+                 mesh.color);
+    }
+    break;
+    case SHADED: {
+      draw_flat_shaded(mesh.transformed_vertices, mesh.triangles, proj_matrix,
+                       light, mesh.color);
+    }
+    break;
   }
 }

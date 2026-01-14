@@ -117,9 +117,8 @@ void update_timer(Game &game, const f32 delta) {
 }
 
 
-
 //returns 3 optional values that list if a collision happened in that axis and what the current veloctiy was
-array<pair<f32,bool>, 3> test_collision(Game &game, EntityId moving, EntityId other, f32 delta) {
+array<pair<f32, bool>, 3> test_collision(Game &game, EntityId moving, EntityId other, f32 delta) {
   auto *transform = game.world.get<JTransform>(moving);
   auto *velocity = game.world.get<Velocity>(moving);
   auto *aabb = game.world.get<AABB>(moving);
@@ -127,7 +126,7 @@ array<pair<f32,bool>, 3> test_collision(Game &game, EntityId moving, EntityId ot
   auto *other_transform = game.world.get<JTransform>(other);
   auto *other_aabb = game.world.get<AABB>(other);
 
-  array<pair<f32,bool>, 3> out = {{{0,false},{0,false},{0,false} }};
+  array<pair<f32, bool>, 3> out = {{{0, false}, {0, false}, {0, false}}};
 
   // test x
   transform->translation.x += velocity->x * delta;
@@ -145,7 +144,7 @@ array<pair<f32,bool>, 3> test_collision(Game &game, EntityId moving, EntityId ot
                              aabb->translated(transform->translation))) {
     out[1].first = velocity->y;
     out[1].second = true;
-                             }
+  }
   transform->translation.y -= velocity->y * delta;
 
   // test z
@@ -154,7 +153,7 @@ array<pair<f32,bool>, 3> test_collision(Game &game, EntityId moving, EntityId ot
                              aabb->translated(transform->translation))) {
     out[2].first = velocity->z;
     out[2].second = true;
-                             }
+  }
   transform->translation.z -= velocity->z * delta;
 
   return out;
@@ -182,7 +181,7 @@ void move_things(Game &game, f32 delta) {
 
   auto *transform = game.world.get<JTransform>(game.floor_id);
   auto *aabb = game.world.get<AABB>(game.floor_id);
-  array<pair<f32,bool>, 3> collision_result = test_collision(game, game.player_id, game.floor_id, delta);
+  array<pair<f32, bool>, 3> collision_result = test_collision(game, game.player_id, game.floor_id, delta);
   std::cout << std::fixed << std::setprecision(2);
   //std::cout << collision_result[1].has_value() << std::endl;
 
@@ -216,7 +215,7 @@ void update_player(Game &game, f32 delta) {
   } else {
     *game.playerref.velocity = Velocity{0, game.playerref.velocity->y, 0};
   }
-  if (IsKeyPressed(KEY_DELETE)){
+  if (IsKeyPressed(KEY_DELETE)) {
     fmt::println("break");
   }
 
@@ -231,8 +230,7 @@ void update_player(Game &game, f32 delta) {
   }
   // check stompin
   for (const EntityId ent: Query<Mob>(game.world)) {
-
-  auto collsions = test_collision(game, game.player_id, ent, delta);
+    auto collsions = test_collision(game, game.player_id, ent, delta);
     // the player perpetually has a
     if (collsions[1].second != false && collsions[1].first > 1) {
       game.world.destroy_entity(ent);
@@ -257,8 +255,7 @@ void update(Game &game) {
 void draw_floor(Game &game) {
   for (EntityId ent: Query<Floor>(game.world)) {
     auto *mesh = game.world.get<JMesh>(ent);
-    draw_flat_shaded(mesh->transformed_vertices, mesh->triangles,
-                     game.camera->projection_matrix, *game.light, mesh->color, 0.2, true);
+    draw_mesh(*mesh, game.camera->projection_matrix, *game.light);
   }
 }
 
@@ -298,9 +295,7 @@ void draw_models(Game &game) {
     // }
 
     auto *mesh = game.world.get<JMesh>(id);
-    draw_flat_shaded(mesh->transformed_vertices, mesh->triangles,
-                     game.camera->projection_matrix, *game.light, mesh->color, 0.2, true);
-    DrawText("mesh, lit, triangle based", 0, 10, 20, WHITE);
+    draw_mesh(*mesh, game.camera->projection_matrix, *game.light);
   }
 };
 
@@ -313,11 +308,14 @@ void draw(Game &game) {
   EndDrawing();
 }
 
+void init_game() {
+}
+
 int main() {
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE);
   SetTargetFPS(120);
 
-
+  init_game();
   Game game;
   JCamera::make_camera(game, {0, -2, 8}, {0, 0, 1});
   Light::make_light(game, {0, -1, 0}, 1);

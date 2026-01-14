@@ -19,6 +19,7 @@ enum DrawMode {
   SHADED,
 };
 
+
 struct JMesh {
   //TODO seperate immutable values to be a pointer instead of making a new copy per mesh
   vector<Vec3> transformed_vertices;
@@ -28,6 +29,7 @@ struct JMesh {
   vector<Vec2> uvs; // can be shared
   vector<Triangle> triangles; // can be shared
   Color color = WHITE;
+  DrawMode draw_mode = SHADED;
 };
 
 
